@@ -54,6 +54,17 @@ export const useQuestionStore = defineStore('questions', {
       try { await questionApi.setMastery(id, status) } catch { /* offline */ }
       return item
     },
+    /** 复习自评后:按 SM-2 语义更新 mastery(与后端 compute_mastery 一致) */
+    applyReview(id: number, status: 'mastered' | 'fuzzy' | 'failed') {
+      const item = this.items.find((q) => q.id === id)
+      if (item) {
+        // 与后端 compute_mastery 对齐: mastered→0.7+reps加成, fuzzy→0.5, failed→0.3
+        const base = { mastered: 0.72, fuzzy: 0.5, failed: 0.3 }[status]
+        item.mastery = base
+        item.review_count = (item.review_count ?? 0) + 1
+      }
+      this.refreshTick++
+    },
     /** 其他操作后通知看板刷新 */
     bumpRefresh() { this.refreshTick++ },
   },

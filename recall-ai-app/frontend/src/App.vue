@@ -197,8 +197,8 @@ async function submitReview(q: { id: number; text: string }, status: 'mastered' 
     const r = await reviewApi.submit(q.id, { status, wrong_reason: '', hint_level: 0, time_cost_sec: 0 })
     toast(`已提交,下次复习 ${r.next_review_at}`)
     reviewItems.value = reviewItems.value.filter((x) => x.id !== q.id)
-    // 同步看板:复习自评后 mastery 真实变化,看板需立即反映
-    store.bumpRefresh()
+    // 立即同步:错题集 + 看板即时反映复习后的掌握度(不等 fetchAll 网络往返)
+    store.applyReview(q.id, status)
     await store.fetchAll()
   } catch (e) {
     toast(`提交失败:${(e as Error).message}`)

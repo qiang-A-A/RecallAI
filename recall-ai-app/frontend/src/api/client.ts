@@ -136,7 +136,17 @@ export const reviewApi = {
     return http.get<{ count: number; items: unknown[] }>('/reviews/today').then((r) => r.data)
   },
   submit: async (id: number, payload: ReviewSubmit) => {
-    if (OFFLINE) { await delay(600); return { next_review_at: '2026-08-15', trigger_variant: payload.status === 'failed', variant_task_id: payload.status === 'failed' ? 'vt_demo' : null } as ReviewSubmitOut }
+    if (OFFLINE) {
+      await delay(600)
+      // 离线版:同步更新 mock 数据(与后端 compute_mastery 语义一致)
+      const q = MOCK_QUESTIONS.find((x) => x.id === id)
+      if (q) {
+        const base = { mastered: 0.72, fuzzy: 0.5, failed: 0.3 }[payload.status]
+        q.mastery = base
+        q.review_count = (q.review_count ?? 0) + 1
+      }
+      return { next_review_at: '2026-08-15', trigger_variant: payload.status === 'failed', variant_task_id: payload.status === 'failed' ? 'vt_demo' : null } as ReviewSubmitOut
+    }
     return http.post<ReviewSubmitOut>(`/reviews/${id}/submit`, payload).then((r) => r.data)
   },
 }
