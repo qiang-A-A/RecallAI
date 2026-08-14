@@ -11,3 +11,58 @@
   ::selection { background: #e6e0f5; }
   :focus-visible { outline: 2px solid #5645d4; outline-offset: 2px; }
 }
+
+/* ===== AI 回复渲染(Markdown + KaTeX) ===== */
+.ai-render {
+  @apply text-[13.5px] leading-[1.75] text-charcoal;
+}
+.ai-render p { @apply my-2; }
+.ai-render p:first-child { @apply mt-0; }
+.ai-render p:last-child { @apply mb-0; }
+.ai-render h1, .ai-render h2, .ai-render h3 {
+  @apply font-bold text-charcoal;
+  margin: 0.9em 0 0.45em;
+}
+.ai-render h1 { font-size: 1.3em; }
+.ai-render h2 { font-size: 1.15em; }
+.ai-render h3 { font-size: 1.05em; }
+.ai-render h1:first-child, .ai-render h2:first-child, .ai-render h3:first-child { margin-top: 0; }
+.ai-render ul, .ai-render ol { @apply pl-6 my-2; }
+.ai-render ul { list-style: disc; }
+.ai-render ol { list-style: decimal; }
+.ai-render li { @apply my-1; }
+.ai-render li > p { @apply my-1; }
+.ai-render strong { @apply font-bold text-charcoal; }
+.ai-render em { @apply italic; }
+.ai-render code:not(.math-error) {
+  @apply bg-[#f6f5f4] px-1.5 py-0.5 rounded-md text-[12.5px] font-mono;
+  color: #3a2a99;
+  border: 1px solid #e5e3df;
+}
+.ai-render pre {
+  @apply bg-[#f6f5f4] rounded-lg p-3 my-2 overflow-x-auto;
+  border: 1px solid #e5e3df;
+}
+.ai-render pre code {
+  background: transparent; border: none; padding: 0; color: #1a1a1a;
+}
+.ai-render blockquote {
+  border-left: 3px solid #5645d4;
+  @apply pl-3 my-2 text-slate;
+}
+.ai-render hr { @apply my-3 border-0 border-t border-[#e5e3df]; }
+.ai-render a { @apply text-[#0075de] underline; }
+.ai-render a:hover { color: #005bab; }
+/* 行内公式 */
+.ai-render .katex { font-size: 1.02em; }
+.ai-render .katex-display {
+  @apply my-2 overflow-x-auto;
+  padding: 0.5em 0;
+}
+/* 数学错误回退样式 */
+.ai-render .math-error {
+  color: #e03131;
+  background: rgba(224, 49, 49, 0.1);
+  padding: 0 4px;
+  border-radius: 4px;
+}

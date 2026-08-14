@@ -44,7 +44,11 @@ export const useQuestionStore = defineStore('questions', {
       const newMastery = { mastered: 0.85, fuzzy: 0.5, failed: 0.2 }[status]
       // 直接修改 store.items(响应式代理),Vue 会自动触发 QuestionsView/AnalyticsView 更新
       const item = this.items.find((q) => q.id === id)
-      if (item) item.mastery = newMastery
+      if (item) {
+        item.mastery = newMastery
+        // 主动标记也算一次活跃(纳入「本周复习」计数),同时让 review_count 反映学习历程
+        item.review_count = (item.review_count ?? 0) + 1
+      }
       this.refreshTick++
       // 运行版同步到后端(失败不阻塞 UI,store 已更新)
       try { await questionApi.setMastery(id, status) } catch { /* offline */ }

@@ -35,30 +35,52 @@ async function loadData() {
   }
 }
 
-// ---------- KPI(动态) ----------
-const kpis = computed(() => [
-  { label: '题目总数', value: String(allQuestions.value.length), unit: '道', delta: '本周在库', up: true },
-  { label: '本周复习', value: String(report.value?.review_count ?? 0), unit: '次', delta: 'SM-2 周期调度', up: true },
-  { label: '平均掌握度', value: String(Math.round(report.value?.mastery_avg ?? 0)), unit: '%', delta: '按复习自评统计', up: (report.value?.mastery_avg ?? 0) >= 60 },
-  { label: '薄弱考点', value: String(report.value?.weak_kps?.length ?? 0), unit: '个', delta: '见下方 AI 推荐', up: false },
-])
+// ---------- KPI(从 store.items 实时计算,确保用户操作后立即变化) ----------
+const kpis = computed(() => {
+  const items = store.items
+  const total = items.length
+  // 平均掌握度:按 mastery 直接平均
+  const avgMastery = total
+    ? items.reduce((s, q) => s + (q.mastery ?? 0), 0) / total
+    : 0
+  // 本周活跃度:所有题 review_count 之和(覆盖标记 + 复习)
+  const reviewCount = items.reduce((s, q) => s + (q.review_count ?? 0), 0)
+  // 薄弱考点:mastery < 0.5 的题按学科聚合
+  const subjWeak = new Map<string, { count: number; avg: number; sum: number }>()
+  for (const q of items) {
+    if ((q.mastery ?? 0) < 0.5) {
+      const e = subjWeak.get(q.subject) ?? { count: 0, avg: 0, sum: 0 }
+      e.count++
+      e.sum += q.mastery ?? 0
+      e.avg = e.sum / e.count
+      subjWeak.set(q.subject, e)
+    }
+  }
+  return [
+    { label: '题目总数', value: String(total), unit: '道', delta: '实时在库', up: true },
+    { label: '本周复习', value: String(reviewCount), unit: '次', delta: '标记+复习', up: true },
+    { label: '平均掌握度', value: String(Math.round(avgMastery * 100)), unit: '%', delta: '按 mastery 实时', up: avgMastery >= 0.6 },
+    { label: '薄弱考点', value: String(subjWeak.size), unit: '个', delta: 'mastery<50%', up: false },
+  ]
+})
 
-// ---------- 环形占比(从真实错题掌握度计算,mastery 为 0-1) ----------
+// ---------- 环形占比(实时从 store.items 算) ----------
 const donut = computed(() => {
+  const items = store.items
   let mastered = 0, fuzzy = 0, failed = 0
-  for (const q of allQuestions.value) {
+  for (const q of items) {
     const m = q.mastery ?? 0
     if (m >= 0.7) mastered++
     else if (m >= 0.4) fuzzy++
     else failed++
   }
-  const total = allQuestions.value.length || 1
+  const total = items.length || 1
   const pct = (n: number) => Math.round((n / total) * 100)
   const mm = pct(mastered), ff = pct(fuzzy), ff2 = 100 - mm - ff
   return [
     { label: '已掌握', value: mm, color: '#1aae39' },
     { label: '模糊', value: ff, color: '#dd5b00' },
-    { label: '不会', value: Math.max(0, ff2), color: '#e03131' },
+    { label: '不会', value: Math.max(0, ff2), color: '#e03131' }
   ]
 })
 const centerPct = computed(() => donut.value[0].value)
@@ -76,10 +98,22 @@ const days = computed(() => {
   }))
 })
 
-// ---------- AI 推荐(动态) ----------
+// ---------- AI 推荐(动态,从实时 items 计算) ----------
 const aiRecs = computed(() => {
   const recs: { tag: string; tagV: 'warn' | 'sys'; title: string; desc: string; actions: string[]; prompt: string }[] = []
-  const weak = report.value?.weak_kps ?? []
+  // 薄弱考点(按学科 mastery 平均 < 0.5)
+  const subjMap = new Map<string, { count: number; sum: number; failed: number }>()
+  for (const q of store.items) {
+    const e = subjMap.get(q.subject) ?? { count: 0, sum: 0, failed: 0 }
+    e.count++
+    e.sum += q.mastery ?? 0
+    if ((q.mastery ?? 0) < 0.5) e.failed++
+    subjMap.set(q.subject, e)
+  }
+  const weak = Array.from(subjMap.entries())
+    .map(([name, e]) => ({ name, mastery: e.sum / e.count, error_count: e.failed }))
+    .filter((x) => x.mastery < 0.5 && x.count >= 1)
+    .sort((a, b) => a.mastery - b.mastery)
   if (weak.length) {
     for (const k of weak.slice(0, 3)) {
       recs.push({

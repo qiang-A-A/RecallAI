@@ -1,14 +1,23 @@
 <script setup lang="ts">
 /** AI 答疑页:历史对话 + 聊天窗口。 */
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useChatStore } from '@/stores'
 import type { ChatMessage } from '@/types'
+import { renderAiReply } from '@/utils/render-md'
 
 const chat = useChatStore()
 const route = useRoute()
 const { messages, typing } = storeToRefs(chat)
+
+/** 把 AI 消息渲染成 HTML(Markdown + KaTeX) */
+const renderedMessages = computed(() =>
+  messages.value.map((m) => ({
+    ...m,
+    html: m.role === 'ai' ? renderAiReply(m.text) : '',
+  })),
+)
 
 const input = ref('')
 const logRef = ref<HTMLElement>()
@@ -125,13 +134,13 @@ function msgKey(m: ChatMessage, i: number): string {
       <!-- 欢迎语 -->
       <div class="bg-[rgba(99,102,241,.08)] border border-tint-lavender rounded-[12px]
                   px-4 py-3.5 mb-3.5 text-[13px] text-slate">
-        <b class="text-primary-deep">欢迎语:</b>你好,我是 Recall AI 学习助手。把不会的题拍给我,或直接提问 —— 我可以帮你诊断知识点、分步讲解、生成变式题。
+        <b class="text-primary-deep">欢迎语:</b><span class="ai-render" v-html="renderAiReply(chat.messages.find(m=>m.role==='ai')?.text || '')" />
       </div>
 
       <!-- 消息流 -->
       <div ref="logRef" class="flex flex-col gap-3 min-h-[280px] max-h-[430px] overflow-y-auto p-1 mb-3">
         <div
-          v-for="(m, i) in messages"
+          v-for="(m, i) in renderedMessages"
           :key="msgKey(m, i)"
           class="flex gap-2.5 max-w-[85%] animate-[slideUp_.25s_ease]"
           :class="m.role === 'user' ? 'self-end flex-row-reverse' : ''"
@@ -148,7 +157,11 @@ function msgKey(m: ChatMessage, i: number): string {
             :class="m.role === 'user'
               ? 'bg-gradient-to-br from-primary to-primary-deep text-white rounded-tr-[4px]'
               : 'bg-white border border-[#e5e3df] shadow-xs rounded-tl-[4px]'"
-          >{{ m.text }}</div>
+          >
+            <!-- 用户消息:白底反色,等换行原文;AI 消息:Markdown + KaTeX 渲染 -->
+            <div v-if="m.role === 'ai'" class="ai-render whitespace-normal" v-html="m.html" />
+            <div v-else class="whitespace-pre-wrap">{{ m.text }}</div>
+          </div>
         </div>
         <!-- 打字动画 -->
         <div v-if="typing" class="flex gap-2.5">
