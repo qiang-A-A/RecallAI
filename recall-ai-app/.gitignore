@@ -28,3 +28,4 @@ Thumbs.db
 .vscode/
 # ===== 本地工作区(不推送) =====
 .workbuddy/
+vite.config.ts.timestamp-*.mjs
