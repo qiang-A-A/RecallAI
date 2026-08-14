@@ -64,11 +64,67 @@ export const useChatStore = defineStore('chat', {
     messages: [] as ChatMessage[],
     typing: false,
     activeTitle: '新对话',
+    activeConvId: '' as string,
+    /** 对话历史:[{ id, title, messages, created_at }],localStorage 持久化 */
+    conversations: [] as { id: string; title: string; messages: ChatMessage[]; created_at: string }[],
   }),
   actions: {
+    /** 从 localStorage 恢复历史会话 */
+    loadConversations() {
+      try {
+        const raw = localStorage.getItem('recall_conversations')
+        if (raw) {
+          this.conversations = JSON.parse(raw)
+          // 恢复上次会话
+          const last = this.conversations[0]
+          if (last) {
+            this.activeConvId = last.id
+            this.messages = [...last.messages]
+            this.activeTitle = last.title
+          }
+        }
+      } catch { /* ignore */ }
+    },
+    _persist() {
+      try { localStorage.setItem('recall_conversations', JSON.stringify(this.conversations)) } catch { /* ignore */ }
+    },
+    /** 新建对话:保存当前会话(若有内容)并创建空白会话 */
     newChat() {
+      // 保存当前会话到历史(若已有用户消息)
+      if (this.activeConvId && this.messages.some((m) => m.role === 'user')) {
+        const conv = this.conversations.find((c) => c.id === this.activeConvId)
+        if (conv) {
+          conv.messages = [...this.messages]
+          conv.title = this.activeTitle
+        }
+        this._persist()
+      }
+      // 创建新会话
+      this.activeConvId = `conv-${Date.now()}`
       this.messages = [{ role: 'ai', text: '你好,我是 Recall AI 学习助手。把不会的题拍给我,或直接提问 —— 我可以帮你诊断知识点、分步讲解、生成变式题。' }]
       this.activeTitle = '新对话'
+      // 新会话也加入历史(标题为"新对话",可在提问后更新)
+      this.conversations.unshift({ id: this.activeConvId, title: '新对话', messages: [...this.messages], created_at: new Date().toISOString() })
+      this._persist()
+    },
+    /** 打开历史会话 */
+    openConversation(id: string) {
+      const conv = this.conversations.find((c) => c.id === id)
+      if (!conv) return
+      this.activeConvId = id
+      this.messages = [...conv.messages]
+      this.activeTitle = conv.title
+    },
+    /** 删除历史会话 */
+    deleteConversation(id: string) {
+      this.conversations = this.conversations.filter((c) => c.id !== id)
+      this._persist()
+      // 若删除的是当前会话,回到新对话
+      if (this.activeConvId === id) {
+        this.activeConvId = ''
+        this.messages = [{ role: 'ai', text: '你好,我是 Recall AI 学习助手。把不会的题拍给我,或直接提问 —— 我可以帮你诊断知识点、分步讲解、生成变式题。' }]
+        this.activeTitle = '新对话'
+      }
     },
     async send(text: string, questionId?: number) {
       if (!this.messages.length) {
@@ -76,10 +132,27 @@ export const useChatStore = defineStore('chat', {
       }
       this.messages.push({ role: 'user', text })
       this.activeTitle = text.slice(0, 12)
+      // 新建会话的首条提问:创建会话记录
+      if (!this.activeConvId) {
+        this.activeConvId = `conv-${Date.now()}`
+        this.conversations.unshift({ id: this.activeConvId, title: this.activeTitle, messages: [...this.messages], created_at: new Date().toISOString() })
+      } else {
+        // 更新历史中该会话的标题/消息
+        const conv = this.conversations.find((c) => c.id === this.activeConvId)
+        if (conv) {
+          conv.title = this.activeTitle
+          conv.messages = [...this.messages]
+        }
+      }
+      this._persist()
       this.typing = true
       try {
         const resp = await aiApi.chat({ message: text, question_id: questionId })
         this.messages.push({ role: 'ai', text: resp.reply })
+        // 更新历史中的 AI 回复
+        const conv = this.conversations.find((c) => c.id === this.activeConvId)
+        if (conv) conv.messages = [...this.messages]
+        this._persist()
       } catch (e) {
         this.messages.push({ role: 'ai', text: `出错了:${(e as Error).message}` })
       } finally {

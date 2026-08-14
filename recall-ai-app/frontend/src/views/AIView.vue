@@ -22,16 +22,33 @@ const renderedMessages = computed(() =>
 const input = ref('')
 const logRef = ref<HTMLElement>()
 
-const chats = [
-  { group: '今天', items: [{ t: '导数单调区间讲解', time: '10:20' }, { t: '圆锥曲线总丢分怎么办', time: '09:41' }] },
-  { group: '昨天', items: [{ t: '受力分析错因诊断', time: '21:05' }, { t: '生成 3 道变式题', time: '19:32' }] },
-  { group: '更早', items: [{ t: '英语时态答疑', time: '8/9' }, { t: '复习计划咨询', time: '8/7' }] },
-]
-
 const chips = ['帮我讲讲这道题', '圆锥曲线总丢分', '生成变式题']
 
+/** 历史会话分组(按日期:今天 / 昨天 / 更早) */
+const groupedChats = computed(() => {
+  const groups: { group: string; items: { id: string; title: string; time: string }[] }[] = []
+  const today = new Date()
+  const dayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const yesterdayStart = new Date(dayStart.getTime() - 86400_000)
+  const push = (group: string, id: string, title: string, time: string) => {
+    let g = groups.find((x) => x.group === group)
+    if (!g) { g = { group, items: [] }; groups.push(g) }
+    g.items.push({ id, title, time })
+  }
+  for (const c of chat.conversations) {
+    const d = new Date(c.created_at)
+    const hm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+    if (d >= dayStart) push('今天', c.id, c.title, hm)
+    else if (d >= yesterdayStart) push('昨天', c.id, c.title, hm)
+    else push('更早', c.id, c.title, `${d.getMonth() + 1}/${d.getDate()}`)
+  }
+  return groups
+})
+
 onMounted(() => {
-  if (!messages.value.length) {
+  // 恢复本地历史会话(若存在)
+  chat.loadConversations()
+  if (!messages.value.length && !chat.activeConvId) {
     chat.messages.push({ role: 'ai', text: '你好,我是 Recall AI 学习助手。把不会的题拍给我,或直接提问 —— 我可以帮你诊断知识点、分步讲解、生成变式题。' })
   }
   // 支持从其他页面(如数据看板)携带 ?q= 提问过来
@@ -52,32 +69,21 @@ function sendChip(c: string) {
   void chat.send(c)
 }
 
-/** 新建对话:清空消息并恢复欢迎语 */
+/** 新建对话 */
 function newChat() {
   chat.newChat()
 }
 
-/** 历史对话点击:加载对应的预设会话记录 */
-function openChat(c: { t: string }) {
-  chat.activeTitle = c.t
-  const presets: Record<string, ChatMessage[]> = {
-    '导数单调区间讲解': [
-      { role: 'user', text: '帮我讲讲导数求单调区间的方法' },
-      { role: 'ai', text: '求单调区间三步:① 求导 f\'(x);② 令 f\'(x)=0 找驻点;③ 列表判定符号。以 f(x)=x³−3x²+1 为例,f\'(x)=3x²−6x=3x(x−2),驻点 0 和 2,单调递减区间为 (0,2)。' },
-    ],
-    '圆锥曲线总丢分怎么办': [
-      { role: 'user', text: '圆锥曲线总丢分怎么办?' },
-      { role: 'ai', text: '圆锥曲线丢分集中在联立方程与判别式。建议:① 先把「设而不求、韦达定理」套路写熟;② 判别式 Δ 判断交点个数别忘;③ 每道题固定答题框架,减少计算失误。需要我给你出一组专项训练吗?' },
-    ],
-    '受力分析错因诊断': [
-      { role: 'user', text: '帮我诊断受力分析的常见错因' },
-      { role: 'ai', text: '受力分析错因 TOP3:① 漏力(摩擦力方向判断错误);② 多力(把合力当分力);③ 正交分解角度代错。建议每次画受力图后按「重力→弹力→摩擦力→其他」顺序核对一遍。' },
-    ],
-  }
-  chat.messages = presets[c.t] ?? [
-    { role: 'user', text: c.t },
-    { role: 'ai', text: `关于「${c.t}」:这是你之前的提问记录。我可以继续讲解或重新梳理,直接告诉我你想深入的方向。` },
-  ]
+/** 历史对话点击:加载对应会话 */
+function openChat(c: { id: string }) {
+  chat.openConversation(c.id)
+}
+
+/** 删除历史对话 */
+function deleteChat(c: { id: string; title: string }, e: Event) {
+  e.stopPropagation()
+  if (!confirm(`确定删除对话「${c.title}」吗?`)) return
+  chat.deleteConversation(c.id)
 }
 
 function msgKey(m: ChatMessage, i: number): string {
@@ -97,20 +103,35 @@ function msgKey(m: ChatMessage, i: number): string {
              stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
         新建对话
       </button>
-      <template v-for="g in chats" :key="g.group">
+      <template v-if="groupedChats.length" v-for="g in groupedChats" :key="g.group">
         <div class="text-[10.5px] font-semibold text-stone tracking-wider uppercase px-2 pt-3 pb-1">
           {{ g.group }}
         </div>
         <button
           v-for="c in g.items"
-          :key="c.t"
-          class="flex items-center gap-2 w-full px-2.5 py-2 rounded-lg text-[13px]
+          :key="c.id"
+          class="group flex items-center gap-2 w-full px-2.5 py-2 rounded-lg text-[13px]
                  transition-all text-left text-slate hover:bg-white hover:text-charcoal"
+          :class="chat.activeConvId === c.id ? 'bg-tint-lavender text-primary-deep font-semibold' : ''"
           @click="openChat(c)"
         >
-          <span>{{ c.t }}</span><span class="ml-auto text-[10.5px] text-stone">{{ c.time }}</span>
+          <span class="truncate">{{ c.title }}</span>
+          <span class="ml-auto text-[10.5px] text-stone flex-none">{{ c.time }}</span>
+          <!-- 删除对话 -->
+          <button class="flex-none w-5 h-5 rounded-md flex items-center justify-center
+                         text-stone opacity-0 group-hover:opacity-100 hover:bg-error hover:text-white transition-opacity"
+                  title="删除对话"
+                  @click.stop="deleteChat(c, $event)">
+            <svg viewBox="0 0 24 24" class="w-3 h-3" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6" /></svg>
+          </button>
         </button>
       </template>
+      <!-- 空历史 -->
+      <div v-else class="text-center py-6 text-[11.5px] text-stone leading-relaxed">
+        <p>暂无历史对话</p>
+        <p class="text-[10.5px] mt-0.5">提问后将自动保存到此处</p>
+      </div>
     </aside>
 
     <!-- 聊天窗口 -->
