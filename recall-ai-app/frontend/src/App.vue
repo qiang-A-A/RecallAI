@@ -158,6 +158,47 @@ function openDetail(q: Question) {
   showDetail.value = true
 }
 
+// ---------- 编辑错题 ----------
+const showEdit = ref(false)
+const editQ = ref<Question | null>(null)
+const editForm = ref({ subject: '', text: '', answer: '', wrong_answer: '', wrong_reason: '', difficulty: '' })
+const editSaving = ref(false)
+function openEdit(q: Question) {
+  editQ.value = q
+  editForm.value = {
+    subject: q.subject,
+    text: q.content_json.text,
+    answer: q.answer,
+    wrong_answer: q.wrong_answer,
+    wrong_reason: q.wrong_reason,
+    difficulty: q.difficulty,
+  }
+  showEdit.value = true
+}
+async function saveEdit() {
+  if (!editQ.value) return
+  if (!editForm.value.text.trim()) { toast('题干不能为空'); return }
+  editSaving.value = true
+  try {
+    await store.update(editQ.value.id, {
+      subject: editForm.value.subject,
+      text: editForm.value.text,
+      answer: editForm.value.answer,
+      wrong_answer: editForm.value.wrong_answer,
+      wrong_reason: editForm.value.wrong_reason,
+      difficulty: editForm.value.difficulty,
+    })
+    // 若详情/编辑的是同一题,同步详情内容
+    if (detailQ.value?.id === editQ.value.id) detailQ.value = store.items.find((x) => x.id === editQ.value!.id) ?? null
+    toast('已保存修改')
+    showEdit.value = false
+  } catch (e) {
+    toast(`保存失败:${(e as Error).message}`)
+  } finally {
+    editSaving.value = false
+  }
+}
+
 // ---------- 删除 ----------
 async function onRemove(q: Question) {
   if (!confirm(`确定删除这道错题吗?\n${q.content_json.text.slice(0, 30)}…`)) return
@@ -233,7 +274,7 @@ onMounted(() => { void store.fetchAll() })
       @export="onExport"
       @remove="onRemove"
       @detail="openDetail"
-      @edit="openDetail"
+      @edit="openEdit"
     />
   </main>
 
@@ -423,6 +464,68 @@ onMounted(() => { void store.fetchAll() })
       <div class="flex justify-end gap-2 px-5 py-4 border-t border-[#e5e3df] bg-[#fafaf9] rounded-b-[16px]">
         <AppButton variant="secondary" size="sm" @click="onRemove(detailQ)">删除</AppButton>
         <AppButton variant="primary" size="sm" @click="showDetail = false">关闭</AppButton>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑错题弹窗 -->
+  <div v-if="showEdit && editQ" class="fixed inset-0 z-[110] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/30" @click="showEdit = false" />
+    <div class="relative bg-white rounded-[16px] shadow-xl w-full max-w-[560px] overflow-hidden">
+      <div class="flex items-center gap-2.5 px-5 py-3.5 border-b border-[#e5e3df]">
+        <svg viewBox="0 0 24 24" class="w-4 h-4 text-primary" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+        <b class="text-sm text-charcoal">编辑错题 #{{ editQ.id }}</b>
+        <button class="ml-auto text-slate hover:text-charcoal text-lg leading-none" @click="showEdit = false">×</button>
+      </div>
+      <div class="p-5 space-y-3.5">
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block">
+            <span class="text-xs font-semibold text-charcoal">学科</span>
+            <select v-model="editForm.subject"
+                    class="mt-1 w-full border border-[#e5e3df] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary bg-white">
+              <option v-for="s in ['数学','物理','化学','生物','英语','语文','其他']" :key="s" :value="s">{{ s }}</option>
+            </select>
+          </label>
+          <label class="block">
+            <span class="text-xs font-semibold text-charcoal">难度</span>
+            <select v-model="editForm.difficulty"
+                    class="mt-1 w-full border border-[#e5e3df] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary bg-white">
+              <option value="easy">容易</option><option value="mid">中等</option><option value="hard">困难</option>
+            </select>
+          </label>
+        </div>
+        <label class="block">
+          <span class="text-xs font-semibold text-charcoal">题干<span class="text-error">*</span></span>
+          <textarea v-model="editForm.text" rows="3"
+                    class="mt-1 w-full border border-[#e5e3df] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary resize-y"
+                    placeholder="题目内容,支持 LaTeX 公式"></textarea>
+        </label>
+        <div class="grid grid-cols-1 gap-3">
+          <label class="block">
+            <span class="text-xs font-semibold text-charcoal">正确答案</span>
+            <input v-model="editForm.answer" class="mt-1 w-full border border-[#e5e3df] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary" placeholder="参考答案" />
+          </label>
+          <label class="block">
+            <span class="text-xs font-semibold text-charcoal">错误作答</span>
+            <input v-model="editForm.wrong_answer" class="mt-1 w-full border border-[#e5e3df] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary" placeholder="当时的错误答案(可选)" />
+          </label>
+          <label class="block">
+            <span class="text-xs font-semibold text-charcoal">错因</span>
+            <select v-model="editForm.wrong_reason"
+                    class="mt-1 w-full border border-[#e5e3df] rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary bg-white">
+              <option value="">未标注</option>
+              <option v-for="r in ['概念混淆','计算失误','审题偏差','方法不熟','其他']" :key="r" :value="r">{{ r }}</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <div class="flex items-center gap-2.5 px-5 py-3.5 border-t border-[#e5e3df] bg-[#fafaf9]">
+        <AppButton variant="secondary" size="sm" @click="showEdit = false">取消</AppButton>
+        <div class="ml-auto" />
+        <AppButton variant="primary" size="sm" :disabled="editSaving" @click="saveEdit">
+          {{ editSaving ? '保存中…' : '保存修改' }}
+        </AppButton>
       </div>
     </div>
   </div>

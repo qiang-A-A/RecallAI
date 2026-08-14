@@ -19,6 +19,19 @@ class QuestionCreate(BaseModel):
     image_base64: Optional[str] = Field(None, description="拍照/截图图片 base64(可选)")
 
 
+class QuestionUpdate(BaseModel):
+    """编辑错题请求(可局部更新)。"""
+
+    subject: Optional[str] = None
+    text: Optional[str] = None
+    answer: Optional[str] = None
+    wrong_answer: Optional[str] = None
+    wrong_reason: Optional[str] = None
+    chapter: Optional[str] = None
+    q_type: Optional[str] = None
+    difficulty: Optional[str] = None
+
+
 class QuestionKPOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -46,6 +59,7 @@ class QuestionOut(BaseModel):
     kps: list[QuestionKPOut] = []
     mastery: float = 0.0
     review_count: int = 0
+    ai_summary: str = ""
 
 
 class QuestionConfirm(BaseModel):

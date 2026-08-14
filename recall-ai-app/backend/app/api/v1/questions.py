@@ -17,6 +17,7 @@ from app.schemas.question import (
     QuestionConfirm,
     QuestionCreate,
     QuestionOut,
+    QuestionUpdate,
 )
 from app.services.ai_service import AIService
 from app.services.ocr_service import OCRService
@@ -245,6 +246,37 @@ def set_mastery(question_id: int, payload: MasteryUpdate, db: Session = Depends(
     rs2 = repo.get_review_state(question_id, DEMO_USER_ID)
     qo = QuestionOut.model_validate(q)
     qo.mastery = round(compute_mastery(rs2), 2)
+    return qo
+
+
+@router.put("/{question_id}", response_model=QuestionOut)
+def update_question(question_id: int, payload: QuestionUpdate, db: Session = Depends(get_db)) -> QuestionOut:
+    """编辑错题:更新题干/学科/答案/错因等(局部更新,空字段不覆盖)。"""
+    repo = QuestionRepository(db)
+    q = repo.get(question_id, DEMO_USER_ID)
+    if not q:
+        raise HTTPException(status_code=404, detail="错题不存在")
+    # 文本字段更新(排除空值)
+    text_map = {
+        "subject": payload.subject, "chapter": payload.chapter, "q_type": payload.q_type,
+        "difficulty": payload.difficulty, "answer": payload.answer,
+        "wrong_answer": payload.wrong_answer, "wrong_reason": payload.wrong_reason,
+    }
+    for field, value in text_map.items():
+        if value is not None and str(value).strip() != "":
+            setattr(q, field, value)
+    # 题干在 content_json.text 内
+    if payload.text is not None and str(payload.text).strip() != "":
+        cj = dict(q.content_json)
+        cj["text"] = payload.text
+        q.content_json = cj
+    db.commit()
+    db.refresh(q)
+    # 重新填充 mastery(复习状态不变)
+    rs = repo.get_review_state(question_id, DEMO_USER_ID)
+    from app.repositories.question_repository import compute_mastery as _cm
+    qo = QuestionOut.model_validate(q)
+    qo.mastery = round(_cm(rs), 2)
     return qo
 
 

@@ -75,6 +75,23 @@ export const questionApi = {
   },
   get: (id: number) => OFFLINE ? Promise.resolve(MOCK_QUESTIONS.find((q) => q.id === id) as Question) : http.get<Question>(`/questions/${id}`).then((r) => r.data),
   confirm: (id: number, payload: QuestionConfirm) => OFFLINE ? Promise.resolve(MOCK_QUESTIONS[0]) : http.post<Question>(`/questions/${id}/confirm`, payload).then((r) => r.data),
+  /** 编辑错题(更新题干/学科/答案/错因等) */
+  update: (id: number, payload: Partial<Pick<Question, 'subject' | 'chapter' | 'q_type' | 'difficulty' | 'answer' | 'wrong_answer' | 'wrong_reason'>> & { text?: string }) => {
+    if (OFFLINE) {
+      const q = MOCK_QUESTIONS.find((x) => x.id === id)
+      if (q) {
+        if (payload.subject) q.subject = payload.subject
+        if (payload.answer) q.answer = payload.answer
+        if (payload.wrong_answer) q.wrong_answer = payload.wrong_answer
+        if (payload.wrong_reason) q.wrong_reason = payload.wrong_reason
+        if (payload.text) q.content_json = { ...q.content_json, text: payload.text }
+        if (payload.difficulty) q.difficulty = payload.difficulty
+        if (payload.chapter) q.chapter = payload.chapter
+      }
+      return Promise.resolve(q as Question)
+    }
+    return http.put<Question>(`/questions/${id}`, payload).then((r) => r.data)
+  },
   remove: (id: number) => OFFLINE ? Promise.resolve() : http.delete(`/questions/${id}`),
   exportPdf: async (subject?: string) => {
     if (OFFLINE) {

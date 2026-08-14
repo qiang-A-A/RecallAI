@@ -23,6 +23,7 @@ export interface Question {
   kps?: QuestionKP[]
   mastery?: number
   review_count?: number
+  ai_summary?: string
 }
 
 /** 录入错题请求(与后端 QuestionCreate 对应) */

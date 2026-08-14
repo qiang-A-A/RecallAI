@@ -39,6 +39,14 @@ export const useQuestionStore = defineStore('questions', {
       this.items = this.items.filter((q) => q.id !== id)
       this.refreshTick++
     },
+    /** 编辑错题:调 API + 更新本地 store */
+    async update(id: number, payload: Parameters<typeof questionApi.update>[1]) {
+      const updated = await questionApi.update(id, payload)
+      const idx = this.items.findIndex((q) => q.id === id)
+      if (idx >= 0) this.items[idx] = updated
+      this.refreshTick++
+      return updated
+    },
     /** 用户标记掌握度:更新本地 + 触发看板刷新 */
     async setMastery(id: number, status: 'mastered' | 'fuzzy' | 'failed') {
       const newMastery = { mastered: 0.85, fuzzy: 0.5, failed: 0.2 }[status]

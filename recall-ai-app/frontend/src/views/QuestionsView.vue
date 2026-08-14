@@ -94,6 +94,17 @@ function masteryColor(m = 0): string {
   return m >= 0.7 ? 'bg-success' : m >= 0.4 ? 'bg-warning' : 'bg-error'
 }
 
+/** 生成 AI 解析摘要:优先后端 ai_summary,否则用识别结果(知识点+错因+答案)动态组合 */
+function aiSummary(q: Question): string {
+  if (q.ai_summary) return q.ai_summary
+  const kp = q.kps?.[0]?.name || ''
+  const parts: string[] = []
+  if (kp) parts.push(`考点:${kp}`)
+  if (q.wrong_reason) parts.push(`错因:${q.wrong_reason}`)
+  if (q.answer) parts.push(`答案:${q.answer}`)
+  return parts.join(' · ')
+}
+
 /** 按 mastery 数值映射掌握状态文本(0-1 → 未掌握/模糊/已掌握) */
 function masteryStatus(m = 0): { text: string; variant: 'error' | 'warn' | 'done' } {
   if (m >= 0.7) return { text: '已掌握', variant: 'done' }
@@ -223,13 +234,13 @@ onMounted(() => store.fetchAll())
               </span>
               <span class="text-[11.5px] text-stone">{{ q.created_at.slice(0, 10) }}</span>
             </div>
-            <!-- AI 解析行:优先用 question.hints 后端真实数据,空则友好引导 -->
-            <div v-if="q.hints || q.ai_summary"
+            <!-- AI 解析行:优先 ai_summary,否则用考点+错因+答案动态组合 -->
+            <div v-if="aiSummary(q)"
                  class="border-l-[3px] border-[#6366f1] bg-[#fafaf9] rounded-r-lg px-2.5 py-1.5
                             mt-2 text-xs text-slate flex items-center gap-1.5">
               <svg viewBox="0 0 24 24" class="w-3 h-3 text-ai-end flex-none" fill="none" stroke="currentColor"
                    stroke-width="1.6" stroke-linecap="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3" /></svg>
-              <span><b class="text-primary-deep">AI 解析:</b>{{ q.ai_summary || q.hints }}</span>
+              <span class="line-clamp-2"><b class="text-primary-deep">AI 解析:</b>{{ aiSummary(q) }}</span>
             </div>
             <div v-else
                  class="border border-dashed border-[#c8c4be] rounded-r-lg px-2.5 py-1.5
