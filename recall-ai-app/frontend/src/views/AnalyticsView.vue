@@ -124,7 +124,7 @@ const aiRecs = computed(() => {
     subjMap.set(q.subject, e)
   }
   const weak = Array.from(subjMap.entries())
-    .map(([name, e]) => ({ name, mastery: e.sum / e.count, error_count: e.failed }))
+    .map(([name, e]) => ({ name, count: e.count, mastery: e.sum / e.count, error_count: e.failed }))
     .filter((x) => x.mastery < 0.5 && x.count >= 1)
     .sort((a, b) => a.mastery - b.mastery)
   if (weak.length) {
