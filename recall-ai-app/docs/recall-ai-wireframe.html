@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recall AI 智能错题本 · Web 端低保真线框原型</title>
+<style>
+/* ============================================================
+   Recall AI · 低保真线框原型 (Axure RP 风格)
+   黑白灰 · 无颜色/图片/装饰 · 突出信息架构与功能布局
+   ============================================================ */
+:root{
+  --ink:#333333;        /* 主文字/主边框 */
+  --ink2:#666666;       /* 次级文字 */
+  --ink3:#999999;       /* 弱化文字/次要线 */
+  --fill:#f2f2f2;       /* 浅灰填充块 */
+  --fill2:#e6e6e6;      /* 中灰填充块 */
+  --dash:#888888;       /* 虚线 */
+  --paper:#ffffff;      /* 画布底 */
+  --hand:"Comic Sans MS","Segoe Print","Chalkboard SE","KaiTi","STKaiti",cursive;
+  --sans:"PingFang SC","Microsoft YaHei","SimHei",-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans);background:#f7f7f7;color:var(--ink);
+  font-size:13px;line-height:1.5;
+}
+
+/* ============ 文档头 ============ */
+.doc-head{
+  background:#fff;border-bottom:2px solid #444;
+  padding:18px 32px;position:sticky;top:0;z-index:50;
+}
+.doc-head h1{margin:0 0 4px;font-size:20px;letter-spacing:.5px;color:#222}
+.doc-head h1 .sketch{font-family:var(--hand);font-size:16px;color:var(--ink3);font-weight:400}
+.doc-head .meta{display:flex;gap:24px;flex-wrap:wrap;font-size:12px;color:var(--ink2)}
+.doc-head .meta b{color:var(--ink)}
+
+/* ============ 页面切换 ============ */
+.pager{max-width:1200px;margin:0 auto;padding:24px 24px 80px}
+.tab-bar{display:flex;gap:0;margin-bottom:20px;border:1.5px solid #444;width:fit-content;background:#fff}
+.tab-bar .tab{padding:8px 22px;font-size:13px;border-right:1.5px solid #444;cursor:pointer;
+  font-family:var(--sans);background:#fff;color:var(--ink)}
+.tab-bar .tab:last-child{border-right:none}
+.tab-bar .tab.active{background:#444;color:#fff}
+.tab-bar .tab:hover{background:#e8e8e8}
+.tab-bar .tab.active:hover{background:#444}
+
+/* ============ 原型画布 ============ */
+.canvas{
+  background:var(--paper);border:2px solid #444;
+  box-shadow:6px 6px 0 rgba(0,0,0,.08);
+  margin-bottom:32px;
+}
+.canvas-cap{
+  display:flex;align-items:center;gap:12px;padding:8px 14px;
+  background:#fff;border-bottom:1.5px dashed #999;
+  font-size:13px;font-weight:700;color:#222;
+}
+.canvas-cap .tag{
+  font-family:var(--hand);font-weight:400;font-size:12px;color:#fff;
+  background:#666;padding:1px 8px;border-radius:2px;
+}
+
+/* 浏览器顶栏模拟 */
+.browser-bar{
+  display:flex;align-items:center;gap:8px;
+  background:#f2f2f2;border-bottom:1.5px solid #999;padding:6px 12px;
+}
+.browser-bar .dots{display:flex;gap:4px}
+.browser-bar .dots i{width:9px;height:9px;border:1.2px solid #777;border-radius:50%;display:block;background:#fff}
+.browser-bar .url{
+  flex:1;max-width:340px;border:1.2px solid #aaa;background:#fff;
+  padding:2px 10px;font-size:11px;color:var(--ink3);
+  font-family:var(--hand);
+}
+
+/* ============ 顶部导航 ============ */
+.top-nav{
+  display:flex;align-items:center;gap:6px;
+  border-bottom:2px solid #444;padding:10px 16px;background:#fff;
+}
+.logo{
+  width:58px;height:26px;border:1.5px solid #333;background:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;letter-spacing:.5px;color:#222;flex:none;
+}
+.nav-item{
+  padding:3px 14px;font-size:12.5px;color:var(--ink);border:1.5px solid transparent;
+  white-space:nowrap;cursor:default;
+}
+.nav-item:hover{border-color:#999;background:#f2f2f2}
+.nav-item.active{border:1.5px solid #333;background:#fff;font-weight:700}
+.nav-sep{width:0;height:18px;border-left:1.5px dashed #bbb;margin:0 4px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* ============ 通用线框元件 ============ */
+.box{border:1.5px solid #444;background:#fff;position:relative}
+.box.dash{border:1.5px dashed var(--dash);background:#fff}
+.box.fill{background:var(--fill)}
+.box.fill2{background:var(--fill2)}
+.lbl{font-size:10.5px;color:var(--ink3);font-family:var(--hand)}
+.btn-wf{
+  display:inline-flex;align-items:center;gap:5px;
+  border:1.5px solid #444;background:#fff;padding:5px 12px;
+  font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;
+}
+.btn-wf.primary{background:#444;color:#fff}
+.btn-wf:hover{background:#e6e6e6}
+.btn-wf.primary:hover{background:#222}
+.btn-wf.sm{padding:3px 9px;font-size:11px}
+.btn-wf .glyph{font-weight:400;color:var(--ink2)}
+.btn-wf.primary .glyph{color:#ccc}
+.input-wf{
+  border:1.5px solid #999;background:#fff;padding:5px 10px;font-size:12px;color:var(--ink);
+  display:flex;align-items:center;gap:6px;min-width:120px;color:#888;
+}
+.input-wf .ph{color:#aaa;font-family:var(--hand);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-glyph{display:inline-block;color:var(--ink2);font-weight:700;font-size:12px}
+.divider-h{height:0;border-top:1.5px dashed #ccc;margin:8px 0}
+
+/* ============ 双栏布局 ============ */
+.two-col{display:grid;grid-template-columns:200px 1fr;min-height:520px}
+.col-left{border-right:1.5px solid #999;background:#fafafa;padding:12px 10px}
+.col-right{padding:14px 16px;background:#fff;min-width:0}
+
+/* ============ 页面1:错题集 ============ */
+.col-title{
+  font-size:12px;font-weight:700;color:#222;
+  padding:4px 6px 8px;border-bottom:1.5px dashed #bbb;margin-bottom:8px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cat-item{
+  display:flex;align-items:center;gap:6px;padding:6px 8px;margin-bottom:2px;
+  border:1.5px solid transparent;font-size:12px;color:var(--ink);cursor:default;
+}
+.cat-item:hover{border-color:#bbb;background:#f0f0f0}
+.cat-item.active{border:1.5px solid #333;background:#fff;font-weight:700}
+.cat-item .cnt{margin-left:auto;font-size:10.5px;color:var(--ink3)}
+.cat-item .arr{color:var(--ink3);font-size:9px}
+.btn-new-cat{
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  border:1.5px dashed #777;padding:6px;margin:10px 4px 4px;
+  font-size:11.5px;color:var(--ink2);font-family:var(--hand);
+}
+.btn-new-cat:hover{background:#f0f0f0;color:#222}
+
+/* 操作栏 */
+.op-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:12px;
+  border-bottom:1.5px dashed #ccc;margin-bottom:14px}
+.op-bar .search{margin-left:auto;min-width:180px}
+.op-bar .filter{min-width:110px}
+
+/* 错题卡片 */
+.q-card{
+  border:1.5px solid #444;background:#fff;padding:12px 14px;margin-bottom:10px;
+  position:relative;
+}
+.q-card:hover{background:#fafafa}
+.q-card .qc-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.q-card .qc-body{font-size:12.5px;color:var(--ink);margin-bottom:8px;line-height:1.6}
+.q-card .qc-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--ink2);margin-bottom:8px}
+.q-card .qc-meta .m{border-left:1.5px solid #ccc;padding-left:8px}
+.q-card .qc-meta .m:first-child{border-left:none;padding-left:0}
+.q-card .qc-meta b{color:#222}
+.q-card .qc-foot{display:flex;align-items:center;gap:6px;border-top:1.5px dashed #ccc;padding-top:8px}
+.q-card .qc-tag{border:1px solid #777;padding:1px 7px;font-size:10.5px;color:var(--ink2);border-radius:2px}
+.q-card .qc-actions{margin-left:auto;display:flex;gap:6px}
+.q-card .del{border-color:#777;color:#444}
+
+/* ============ 页面2:AI 答疑 ============ */
+.chat-list-item{
+  display:flex;align-items:center;gap:6px;padding:7px 8px;margin-bottom:2px;
+  border:1.5px solid transparent;font-size:12px;color:var(--ink);cursor:default;
+}
+.chat-list-item:hover{border-color:#bbb;background:#f0f0f0}
+.chat-list-item.active{border:1.5px solid #333;background:#fff;font-weight:700}
+.chat-list-item .t{margin-left:auto;font-size:10px;color:var(--ink3)}
+.chat-group{font-size:10.5px;color:var(--ink3);padding:10px 6px 4px;letter-spacing:1px}
+
+.chat-head{padding-bottom:10px;border-bottom:1.5px solid #999;margin-bottom:12px}
+.chat-welcome{
+  border:1.5px dashed #999;background:#fafafa;padding:12px 14px;margin-bottom:14px;
+  font-size:12.5px;color:var(--ink);
+}
+.chat-welcome .w-t{font-weight:700;font-size:13px;margin-bottom:3px}
+.chat-log{display:flex;flex-direction:column;gap:10px;min-height:260px;margin-bottom:12px}
+.bubble{border:1.5px solid #444;padding:8px 12px;font-size:12.5px;max-width:70%;background:#fff}
+.bubble.ai{border-style:solid;border-radius:2px}
+.bubble.user{margin-left:auto;background:var(--fill);border-style:solid}
+.bubble .who{font-size:10px;color:var(--ink3);display:block;margin-bottom:2px;font-family:var(--hand)}
+.bubble .ph-line{height:7px;background:#e2e2e2;margin:3px 0;border-radius:1px}
+.chat-input-bar{display:flex;gap:8px;border-top:1.5px dashed #ccc;padding-top:12px}
+.chat-input-bar .input-wf{flex:1;min-height:34px}
+
+/* ============ 图例 ============ */
+.legend{
+  border:1.5px solid #999;background:#fff;padding:12px 16px;margin-bottom:24px;
+  display:flex;gap:24px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2);
+}
+.legend .lg{display:flex;align-items:center;gap:6px}
+.legend .sw{width:22px;height:14px;border:1.5px solid #444;background:#fff;display:inline-block}
+.legend .sw.dash{border-style:dashed}
+.legend .sw.fill{background:#f2f2f2}
+.legend .sw.dark{background:#444}
+.legend b{color:#222}
+
+/* ============ 页面3:数据看板 ============ */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.kpi-card{border:1.5px solid #444;background:#fff;padding:12px 14px;text-align:center}
+.kpi-card .k{font-size:11px;color:var(--ink2);margin-bottom:4px}
+.kpi-card .v{font-size:22px;font-weight:700;color:#222;font-variant-numeric:tabular-nums}
+.kpi-card .v small{font-size:11px;font-weight:400;color:var(--ink3)}
+.kpi-card .d{font-size:10.5px;color:var(--ink3);margin-top:3px;font-family:var(--hand)}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.wf-panel{border:1.5px solid #444;background:#fff;padding:14px 16px}
+.wf-panel .p-t{font-size:12.5px;font-weight:700;color:#222;padding-bottom:8px;margin-bottom:10px;
+  border-bottom:1.5px dashed #ccc;display:flex;align-items:center;justify-content:space-between}
+.wf-panel .p-t .p-note{font-weight:400;font-size:10.5px;color:var(--ink3);font-family:var(--hand)}
+
+/* 环形占比图(黑白灰) */
+.donut-wrap{display:flex;align-items:center;gap:18px}
+.donut{width:130px;height:130px;flex:none;position:relative}
+.donut svg{transform:rotate(-90deg)}
+.donut .dt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut .dt b{font-size:20px;color:#222;line-height:1;font-variant-numeric:tabular-nums}
+.donut .dt span{font-size:9.5px;color:var(--ink3)}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:7px}
+.dl-item{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink)}
+.dl-item .sw{width:12px;height:12px;border:1.5px solid #444;flex:none;display:inline-block}
+.dl-item .sw.dark{background:#444}
+.dl-item .sw.mid{background:#c8c8c8}
+.dl-item .sw.light{background:#f2f2f2}
+.dl-item .pct{margin-left:auto;font-weight:700;color:#222;font-variant-numeric:tabular-nums}
+
+/* 最近10天柱状图 */
+.bar-chart{display:flex;align-items:flex-end;gap:6px;height:130px;padding:6px 4px 0;position:relative}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.bar-col .bar{width:100%;max-width:30px;border:1.5px solid #444;background:var(--fill);
+  transition:background .15s}
+.bar-col .bar.dark{background:#444}
+.bar-col:hover .bar{background:#c8c8c8}
+.bar-col .bv{font-size:9.5px;color:var(--ink2);font-variant-numeric:tabular-nums;line-height:1}
+.bar-col .bd{font-size:9.5px;color:var(--ink3);line-height:1;margin-top:2px}
+.chart-axis{border-top:1.5px solid #777;margin:0 6px;padding-top:3px;
+  display:flex;justify-content:space-between;font-size:9.5px;color:var(--ink3)}
+
+/* AI 优化推荐 */
+.ai-rec{border:1.5px dashed var(--dash);background:#fafafa;padding:10px 12px;margin-bottom:8px}
+.ai-rec .r-t{font-size:12px;font-weight:700;color:#222;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.ai-rec .r-t .badge-wf{border:1px solid #777;padding:0 6px;font-size:9.5px;color:var(--ink2);border-radius:2px}
+.ai-rec .r-d{font-size:11px;color:var(--ink2);margin-bottom:7px}
+.ai-rec .r-a{display:flex;gap:6px}
+
+/* ============ 页脚 ============ */
+.doc-foot{text-align:center;padding:30px;font-size:11px;color:var(--ink3);font-family:var(--hand)}
+
+/* ============ 响应式(原型查看) ============ */
+@media (max-width:860px){
+  .two-col{grid-template-columns:150px 1fr}
+  .op-bar .search{margin-left:0;width:100%}
+}
+@media (max-width:640px){
+  .two-col{grid-template-columns:1fr}
+  .col-left{border-right:none;border-bottom:1.5px solid #999}
+  .top-nav{flex-wrap:wrap}
+  .nav-right{margin-left:0;width:100%}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= 文档头 ================= -->
+<header class="doc-head">
+  <h1>Recall AI 智能错题本 · Web 端低保真线框原型 <span class="sketch">(Low-Fi Wireframe v0.1)</span></h1>
+  <div class="meta">
+    <span><b>风格</b> Axure RP 产品原型 · 黑白灰线框</span>
+    <span><b>目的</b> 信息架构与功能布局评审</span>
+    <span><b>页面</b> ① 错题集主页 ② AI 答疑 ③ 数据看板</span>
+    <span><b>原则</b> 无颜色 · 无图片 · 无装饰</span>
+  </div>
+</header>
+
+<div class="pager">
+
+  <!-- ================= 图例 ================= -->
+  <div class="legend">
+    <span style="flex-basis:100%;font-weight:700;color:#222;margin-bottom:4px">线框元件图例</span>
+    <span class="lg"><span class="sw"></span> 实线框:确定模块</span>
+    <span class="lg"><span class="sw dash"></span> 虚线框:占位 / 待定区域</span>
+    <span class="lg"><span class="sw fill"></span> 浅灰填充:容器 / 分组</span>
+    <span class="lg"><span class="sw dark"></span> 深灰:主操作 / 当前态</span>
+    <span class="lg"><span style="font-family:var(--hand);color:#666">手写体</span> 标注 / 说明文字</span>
+    <span class="lg"><span style="border-bottom:1px dotted #bbb">下划虚点</span> 交互说明</span>
+  </div>
+
+  <!-- ================= Tab 切换 ================= -->
+  <div class="tab-bar" role="tablist">
+    <button class="tab active" data-tab="p1" role="tab" aria-selected="true">页面 1 · 错题集主页</button>
+    <button class="tab" data-tab="p2" role="tab" aria-selected="false">页面 2 · AI 答疑</button>
+    <button class="tab" data-tab="p3" role="tab" aria-selected="false">页面 3 · 数据看板</button>
+  </div>
+
+  <!-- ============ 页面 1:错题集主页 ============ -->
+  <section class="canvas" id="p1" role="tabpanel">
+    <div class="canvas-cap">
+      <span class="tag">页面 1</span> 错题集主页
+    </div>
+
+    <!-- 浏览器模拟 -->
+    <div class="browser-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="url">recall.ai / 错题集</span>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="top-nav">
+      <span class="logo">Recall</span>
+      <span class="nav-item">学习台</span>
+      <span class="nav-item active">错题集</span>
+      <span class="nav-item">AI 答疑</span>
+      <span class="nav-item">数据看板</span>
+      <span class="nav-sep"></span>
+      <span class="nav-item">帮助</span>
+      <span class="nav-right">
+        <span class="input-wf" style="min-width:140px"><span class="icon-glyph">⌕</span><span class="ph">全局搜索…</span></span>
+        <span class="btn-wf sm">登录 / 头像</span>
+      </span>
+    </nav>
+
+    <!-- 双栏主体 -->
+    <div class="two-col">
+
+      <!-- 左:错题分类导航 -->
+      <aside class="col-left">
+        <div class="col-title">错题分类<span class="icon-glyph" style="font-size:10px">▾</span></div>
+        <div class="cat-item active"><span>全部错题</span><span class="cnt">36</span></div>
+        <div class="cat-item"><span>数学</span><span class="cnt">18</span></div>
+        <div class="cat-item"><span>物理</span><span class="cnt">10</span></div>
+        <div class="cat-item"><span>英语</span><span class="cnt">8</span></div>
+        <div class="cat-item"><span class="arr">▸</span><span>收藏夹</span><span class="cnt">5</span></div>
+        <div class="cat-item"><span class="arr">▸</span><span>考前冲刺</span><span class="cnt">3</span></div>
+        <div class="btn-new-cat">＋ 创建错题分类</div>
+      </aside>
+
+      <!-- 右:操作栏 + 卡片列表 -->
+      <div class="col-right">
+        <!-- 操作栏 -->
+        <div class="op-bar">
+          <span class="btn-wf primary"><span class="glyph">✚</span> 录入错题</span>
+          <span class="btn-wf"><span class="glyph">▶</span> 开始复习</span>
+          <span class="btn-wf"><span class="glyph">⇩</span> 导出</span>
+          <span class="input-wf search"><span class="icon-glyph">⌕</span><span class="ph">搜索题目 / 知识点…</span></span>
+          <span class="input-wf filter"><span class="ph">筛选:学科 ▾</span></span>
+          <span class="input-wf filter"><span class="ph">状态 ▾</span></span>
+        </div>
+
+        <!-- 错题卡片列表 -->
+        <div class="lbl" style="margin-bottom:6px">错题卡片列表(共 36 道 · 当前显示 3 / 分页)</div>
+
+        <!-- 卡片 1 -->
+        <div class="q-card">
+          <div class="qc-top">
+            <span class="qc-tag">数学</span>
+            <span class="qc-tag">未掌握</span>
+            <span style="font-size:10.5px;color:var(--ink3);margin-left:auto">最近错误:今天</span>
+          </div>
+          <div class="qc-body">题目:已知函数 f(x) = x³ − 3x² + 1,求 f(x) 的单调递减区间。</div>
+          <div class="qc-meta">
+            <span class="m"><b>来源</b> 单元测试 · 9月月考卷</span>
+            <span class="m"><b>学科</b> 数学</span>
+            <span class="m"><b>知识点</b> 导数与单调性</span>
+            <span class="m"><b>AI 解析</b> 求导 → 定号 → 得区间</span>
+          </div>
+          <div class="qc-foot">
+            <span style="font-size:11px;color:var(--ink2)">复习次数:<b>3</b> 次 · 正确率 33%</span>
+            <span class="qc-actions">
+              <span class="btn-wf sm"><span class="glyph">✎</span> 编辑</span>
+              <span class="btn-wf sm del"><span class="glyph">✕</span> 删除</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 卡片 2 -->
+        <div class="q-card">
+          <div class="qc-top">
+            <span class="qc-tag">物理</span>
+            <span class="qc-tag">模糊</span>
+            <span style="font-size:10.5px;color:var(--ink3);margin-left:auto">最近错误:昨天</span>
+          </div>
+          <div class="qc-body">题目:物体在倾角 30° 斜面上匀速下滑,求动摩擦因数 μ。</div>
+          <div class="qc-meta">
+            <span class="m"><b>来源</b> 课后作业</span>
+            <span class="m"><b>学科</b> 物理</span>
+            <span class="m"><b>知识点</b> 受力分析</span>
+            <span class="m"><b>AI 解析</b> 正交分解 → μ = tan30°</span>
+          </div>
+          <div class="qc-foot">
+            <span style="font-size:11px;color:var(--ink2)">复习次数:<b>4</b> 次 · 正确率 50%</span>
+            <span class="qc-actions">
+              <span class="btn-wf sm"><span class="glyph">✎</span> 编辑</span>
+              <span class="btn-wf sm del"><span class="glyph">✕</span> 删除</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 卡片 3 -->
+        <div class="q-card">
+          <div class="qc-top">
+            <span class="qc-tag">英语</span>
+            <span class="qc-tag">已掌握</span>
+            <span style="font-size:10.5px;color:var(--ink3);margin-left:auto">最近错误:8月9日</span>
+          </div>
+          <div class="qc-body">题目:The committee ___ (decide) to postpone the meeting. 用适当形式填空。</div>
+          <div class="qc-meta">
+            <span class="m"><b>来源</b> 真题演练</span>
+            <span class="m"><b>学科</b> 英语</span>
+            <span class="m"><b>知识点</b> 时态语态</span>
+            <span class="m"><b>AI 解析</b> 一般过去时 decided</span>
+          </div>
+          <div class="qc-foot">
+            <span style="font-size:11px;color:var(--ink2)">复习次数:<b>1</b> 次 · 正确率 100%</span>
+            <span class="qc-actions">
+              <span class="btn-wf sm"><span class="glyph">✎</span> 编辑</span>
+              <span class="btn-wf sm del"><span class="glyph">✕</span> 删除</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 分页 -->
+        <div style="display:flex;justify-content:center;gap:6px;margin-top:14px">
+          <span class="btn-wf sm">‹</span>
+          <span class="btn-wf sm primary">1</span>
+          <span class="btn-wf sm">2</span>
+          <span class="btn-wf sm">3</span>
+          <span class="btn-wf sm">›</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 页面 2:AI 答疑 ============ -->
+  <section class="canvas" id="p2" role="tabpanel" style="display:none">
+    <div class="canvas-cap">
+      <span class="tag">页面 2</span> AI 答疑
+    </div>
+
+    <div class="browser-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="url">recall.ai / ai-chat</span>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="top-nav">
+      <span class="logo">Recall</span>
+      <span class="nav-item">学习台</span>
+      <span class="nav-item">错题集</span>
+      <span class="nav-item active">AI 答疑</span>
+      <span class="nav-item">数据看板</span>
+      <span class="nav-sep"></span>
+      <span class="nav-item">帮助</span>
+      <span class="nav-right">
+        <span class="input-wf" style="min-width:140px"><span class="icon-glyph">⌕</span><span class="ph">全局搜索…</span></span>
+        <span class="btn-wf sm">登录 / 头像</span>
+      </span>
+    </nav>
+
+    <div class="two-col">
+      <!-- 左:历史对话列表 -->
+      <aside class="col-left">
+        <div class="btn-new-cat" style="margin:0 0 10px">＋ 新建对话</div>
+        <div class="chat-group">今天</div>
+        <div class="chat-list-item active"><span>导数单调区间讲解</span><span class="t">10:20</span></div>
+        <div class="chat-list-item"><span>圆锥曲线总丢分怎么办</span><span class="t">09:41</span></div>
+        <div class="chat-group">昨天</div>
+        <div class="chat-list-item"><span>受力分析错因诊断</span><span class="t">21:05</span></div>
+        <div class="chat-list-item"><span>生成 3 道变式题</span><span class="t">19:32</span></div>
+        <div class="chat-group">更早</div>
+        <div class="chat-list-item"><span>英语时态答疑</span><span class="t">8/9</span></div>
+        <div class="chat-list-item"><span>复习计划咨询</span><span class="t">8/7</span></div>
+      </aside>
+
+      <!-- 右:聊天区 -->
+      <div class="col-right">
+        <div class="chat-head">
+          <div style="font-weight:700;font-size:14px">AI 答疑助手</div>
+          <div style="font-size:11px;color:var(--ink3);font-family:var(--hand)">基于你的错题画像 · 可溯源 · 提供 3 级提示讲解</div>
+        </div>
+
+        <!-- 欢迎语 -->
+        <div class="chat-welcome">
+          <div class="w-t">欢迎语</div>
+          你好,我是 Recall AI 学习助手。把不会的题拍给我,或直接提问 —— 我可以帮你诊断知识点、分步讲解、生成变式题。
+        </div>
+
+        <!-- 聊天记录 -->
+        <div class="chat-log">
+          <div class="bubble user">
+            <span class="who">我</span>
+            帮我讲讲「导数与单调性」这道题的思路
+          </div>
+          <div class="bubble ai">
+            <span class="who">Recall AI</span>
+            好的!先求导 f'(x) = 3x² − 6x,令其为零得 x=0、x=2…
+            <div class="ph-line" style="width:70%"></div>
+            <div class="ph-line" style="width:45%"></div>
+          </div>
+          <div class="bubble user">
+            <span class="who">我</span>
+            再生成一道变式题?
+          </div>
+          <div class="bubble ai">
+            <span class="who">Recall AI</span>
+            已生成 3 道变式题(难度递增):① 参数替换 ② 参数讨论 ③ 综合应用…
+            <div class="ph-line" style="width:60%"></div>
+          </div>
+        </div>
+
+        <!-- 输入区 -->
+        <div class="chat-input-bar">
+          <span class="input-wf"><span class="ph">输入你的问题…(支持公式 / 题目粘贴)</span></span>
+          <span class="btn-wf primary">发送</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+          <span class="btn-wf sm">帮我讲讲这道题</span>
+          <span class="btn-wf sm">生成变式题</span>
+          <span class="btn-wf sm">制定复习计划</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 页面 3:数据看板 ============ -->
+  <section class="canvas" id="p3" role="tabpanel" style="display:none">
+    <div class="canvas-cap">
+      <span class="tag">页面 3</span> 数据看板
+    </div>
+
+    <div class="browser-bar">
+      <span class="dots"><i></i><i></i><i></i></span>
+      <span class="url">recall.ai / dashboard</span>
+    </div>
+
+    <!-- 顶部导航 -->
+    <nav class="top-nav">
+      <span class="logo">Recall</span>
+      <span class="nav-item">学习台</span>
+      <span class="nav-item">错题集</span>
+      <span class="nav-item">AI 答疑</span>
+      <span class="nav-item active">数据看板</span>
+      <span class="nav-sep"></span>
+      <span class="nav-item">帮助</span>
+      <span class="nav-right">
+        <span class="input-wf" style="min-width:140px"><span class="icon-glyph">⌕</span><span class="ph">全局搜索…</span></span>
+        <span class="btn-wf sm">登录 / 头像</span>
+      </span>
+    </nav>
+
+    <!-- 看板内容区 -->
+    <div class="col-right" style="border:none">
+
+      <!-- 筛选行 -->
+      <div class="op-bar">
+        <span class="input-wf" style="min-width:110px"><span class="ph">时间范围:近 30 天 ▾</span></span>
+        <span class="input-wf" style="min-width:110px"><span class="ph">学科:全部 ▾</span></span>
+        <span class="btn-wf" style="margin-left:auto"><span class="glyph">⇩</span> 导出报告</span>
+      </div>
+
+      <!-- 题目总数 KPI 行 -->
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="k">题目总数</div><div class="v">36<small> 道</small></div><div class="d">↑ 本周 +5</div></div>
+        <div class="kpi-card"><div class="k">今日复习</div><div class="v">3<small> 题待复习</small></div><div class="d">完成 42%</div></div>
+        <div class="kpi-card"><div class="k">平均掌握度</div><div class="v">58<small>%</small></div><div class="d">↑ 较上周 +6%</div></div>
+        <div class="kpi-card"><div class="k">连续打卡</div><div class="v">7<small> 天</small></div><div class="d">最佳记录 12 天</div></div>
+      </div>
+
+      <!-- 完成占比 + 最近十天 -->
+      <div class="dash-grid">
+        <!-- 完成情况占比 -->
+        <div class="wf-panel">
+          <div class="p-t">完成情况占比<span class="p-note">环形图 · 点击分段下载错题列表</span></div>
+          <div class="donut-wrap">
+            <div class="donut">
+              <svg width="130" height="130" viewBox="0 0 130 130">
+                <!-- 环形分段:已掌握 56% / 模糊 30% / 不会 14% -->
+                <circle cx="65" cy="65" r="48" fill="none" stroke="#f2f2f2" stroke-width="18"/>
+                <circle cx="65" cy="65" r="48" fill="none" stroke="#444" stroke-width="18"
+                  stroke-dasharray="169.6 302" stroke-linecap="butt"/>
+                <circle cx="65" cy="65" r="48" fill="none" stroke="#c8c8c8" stroke-width="18"
+                  stroke-dasharray="90.8 302" stroke-dashoffset="-169.6" stroke-linecap="butt"/>
+                <circle cx="65" cy="65" r="48" fill="none" stroke="#e8e8e8" stroke-width="18"
+                  stroke-dasharray="42.3 302" stroke-dashoffset="-260.4" stroke-linecap="butt"/>
+              </svg>
+              <div class="dt"><b>56%</b><span>已掌握</span></div>
+            </div>
+            <div class="donut-legend">
+              <div class="dl-item"><span class="sw dark"></span>已掌握<span class="pct">56%</span></div>
+              <div class="dl-item"><span class="sw mid"></span>模糊<span class="pct">30%</span></div>
+              <div class="dl-item"><span class="sw light"></span>不会<span class="pct">14%</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 最近十天做题情况 -->
+        <div class="wf-panel">
+          <div class="p-t">最近十天做题情况<span class="p-note">柱状图 · 蓝色=正确 / 灰色=错误</span></div>
+          <div class="bar-chart">
+            <div class="bar-col"><span class="bv">8</span><div class="bar" style="height:62%"></div><span class="bd">8/3</span></div>
+            <div class="bar-col"><span class="bv">12</span><div class="bar" style="height:80%"></div><span class="bd">8/4</span></div>
+            <div class="bar-col"><span class="bv">6</span><div class="bar" style="height:45%"></div><span class="bd">8/5</span></div>
+            <div class="bar-col"><span class="bv">10</span><div class="bar" style="height:68%"></div><span class="bd">8/6</span></div>
+            <div class="bar-col"><span class="bv">5</span><div class="bar" style="height:38%"></div><span class="bd">8/7</span></div>
+            <div class="bar-col"><span class="bv">14</span><div class="bar dark" style="height:88%"></div><span class="bd">8/8</span></div>
+            <div class="bar-col"><span class="bv">9</span><div class="bar" style="height:58%"></div><span class="bd">8/9</span></div>
+            <div class="bar-col"><span class="bv">11</span><div class="bar" style="height:72%"></div><span class="bd">8/10</span></div>
+            <div class="bar-col"><span class="bv">13</span><div class="bar dark" style="height:85%"></div><span class="bd">8/11</span></div>
+            <div class="bar-col"><span class="bv">7</span><div class="bar" style="height:50%"></div><span class="bd">8/12</span></div>
+          </div>
+          <div class="chart-axis"><span>8/3</span><span>8/6</span><span>8/9</span><span>8/12</span></div>
+        </div>
+      </div>
+
+      <!-- AI 题目优化推荐 -->
+      <div class="wf-panel">
+        <div class="p-t">AI 题目优化推荐<span class="p-note">基于薄弱考点自动推荐 · 每条可操作</span></div>
+
+        <div class="ai-rec">
+          <div class="r-t"><span class="badge-wf">薄弱考点</span> 受力分析 · 物理</div>
+          <div class="r-d">连续 4 次复习未掌握,建议先看 AI 讲解再重做 2 道变式题。</div>
+          <div class="r-a">
+            <span class="btn-wf sm primary">开始强化</span>
+            <span class="btn-wf sm">查看讲解</span>
+            <span class="btn-wf sm">生成变式</span>
+          </div>
+        </div>
+
+        <div class="ai-rec">
+          <div class="r-t"><span class="badge-wf">易错高频</span> 圆锥曲线 · 数学</div>
+          <div class="r-d">近 10 天错 3 次,错误原因集中在「联立方程判别式」,已为你生成专项训练。</div>
+          <div class="r-a">
+            <span class="btn-wf sm primary">专项训练</span>
+            <span class="btn-wf sm">查看讲解</span>
+          </div>
+        </div>
+
+        <div class="ai-rec">
+          <div class="r-t"><span class="badge-wf">即将遗忘</span> 时态语态 · 英语</div>
+          <div class="r-d">距上次复习已 6 天,进入遗忘窗口,建议今天安排 1 次快速复习。</div>
+          <div class="r-a">
+            <span class="btn-wf sm primary">立即复习</span>
+            <span class="btn-wf sm">稍后提醒</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <div class="doc-foot">Recall AI · Web 端低保真线框原型 v0.1 · 黑白灰线框 · 用于结构评审,后续输出高保真 UI</div>
+</div>
+
+<script>
+/* Tab 切换(原型浏览用) */
+document.querySelectorAll('.tab-bar .tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-bar .tab').forEach(t=>{t.classList.remove('active');t.setAttribute('aria-selected','false')});
+    tab.classList.add('active');tab.setAttribute('aria-selected','true');
+    document.querySelectorAll('.canvas').forEach(c=>c.style.display='none');
+    document.getElementById(tab.dataset.tab).style.display='block';
+  });
+});
+</script>
+</body>
+</html>

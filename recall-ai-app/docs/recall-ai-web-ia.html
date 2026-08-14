@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recall AI 智能错题本 · Web 端信息架构</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+/* ============================================================
+   Recall AI · 设计系统 (遵循 DESIGN.md v1.0)
+   ============================================================ */
+:root{
+  --primary:#5645d4; --primary-pressed:#4534b3; --primary-deep:#3a2a99;
+  --on-primary:#ffffff; --link-blue:#0075de; --link-blue-pressed:#005bab;
+  --brand-purple:#7b3ff2; --brand-purple-300:#d6b6f6;
+  --success:#1aae39; --success-tint:#d9f3e1;
+  --warning:#dd5b00; --warning-tint:#ffe8d4;
+  --error:#e03131; --error-tint:#fde0ec;
+  --info:#0075de; --info-tint:#dcecfa;
+  --tint-mint:#d9f3e1; --tint-lavender:#e6e0f5; --tint-sky:#dcecfa;
+  --tint-peach:#ffe8d4; --tint-yellow:#fef7d6; --tint-cream:#f8f5e8;
+  --canvas:#ffffff; --surface:#f6f5f4; --surface-soft:#fafaf9;
+  --hairline:#e5e3df; --hairline-soft:#ede9e4; --hairline-strong:#c8c4be;
+  --ink:#1a1a1a; --charcoal:#37352f; --slate:#5d5b54; --steel:#787671;
+  --stone:#a4a097; --muted:#bbb8b1;
+  --font-sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC","Inter",-apple-system,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Consolas,"JetBrains Mono",monospace;
+  --r-sm:6px; --r-md:10px; --r-lg:16px;
+  --shadow-xs:0 1px 2px rgba(10,21,48,.05);
+  --shadow-sm:0 1px 3px rgba(10,21,48,.06),0 1px 2px rgba(10,21,48,.04);
+  --shadow-md:0 4px 12px rgba(10,21,48,.08),0 2px 4px rgba(10,21,48,.04);
+  --shadow-lg:0 12px 32px rgba(10,21,48,.10),0 4px 8px rgba(10,21,48,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--surface-soft);color:var(--ink);
+  line-height:1.65;font-size:14px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:56px 32px 120px}
+
+/* ---------- Hero ---------- */
+.hero{background:linear-gradient(160deg,#0a1530 0%,#1a2a52 55%,#2d2a66 100%);
+  border-radius:20px;padding:48px 52px;color:#fff;position:relative;overflow:hidden;margin-bottom:36px}
+.hero::before{content:"";position:absolute;right:-60px;top:-60px;width:280px;height:280px;
+  background:radial-gradient(circle,rgba(123,63,242,.35),transparent 70%)}
+.hero::after{content:"";position:absolute;right:80px;bottom:-80px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(245,215,94,.18),transparent 70%)}
+.hero .eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--brand-purple-300);
+  text-transform:uppercase;margin:0 0 10px}
+.hero h1{font-size:34px;font-weight:650;line-height:1.15;letter-spacing:-.02em;margin:0 0 12px}
+.hero h1 em{font-style:normal;color:#f5d75e}
+.hero .sub{font-size:15px;color:rgba(255,255,255,.78);max-width:680px;margin:0 0 22px}
+.hero .meta{display:flex;gap:10px;flex-wrap:wrap}
+.hero .chip{padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.18);font-size:12px;color:rgba(255,255,255,.9)}
+
+/* ---------- Section ---------- */
+.section{margin:52px 0}
+.section-head{display:flex;align-items:baseline;gap:14px;margin:0 0 8px}
+.section-num{font-size:13px;font-weight:700;color:var(--primary);background:var(--tint-lavender);
+  padding:4px 12px;border-radius:999px;white-space:nowrap}
+.section-title{font-size:23px;font-weight:650;letter-spacing:-.01em;margin:0}
+.section-desc{color:var(--slate);font-size:13.5px;margin:0 0 20px}
+
+/* ---------- Cards ---------- */
+.card{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-lg);padding:20px 22px;
+  box-shadow:var(--shadow-xs);margin-bottom:16px}
+.card h3{margin:0 0 10px;font-size:15px;font-weight:650}
+.card p{margin:0 0 8px;color:var(--charcoal)}
+.card ul{margin:6px 0 0;padding-left:18px}
+.card ul li{margin:4px 0;color:var(--charcoal)}
+
+.flow-box{background:#fff;border:1px solid var(--hairline-strong);border-radius:var(--r-lg);
+  padding:28px 24px;margin-bottom:20px;box-shadow:var(--shadow-sm);overflow-x:auto}
+.flow-caption{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.flow-caption .t{font-size:14px;font-weight:600;color:var(--charcoal)}
+.flow-caption .badge{font-size:11px;font-weight:600;color:var(--stone);background:var(--surface);
+  border:1px solid var(--hairline);padding:3px 10px;border-radius:999px}
+.mermaid{text-align:center}
+
+/* ---------- IA 层级块 ---------- */
+.ia-level{display:flex;flex-direction:column;gap:10px;margin:16px 0}
+.ia-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.ia-node{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-md);
+  padding:12px 14px;box-shadow:var(--shadow-xs)}
+.ia-node .nm{font-size:13.5px;font-weight:650;margin-bottom:2px}
+.ia-node .ds{font-size:11.5px;color:var(--steel)}
+.ia-node.l1{border-color:var(--primary);border-left:4px solid var(--primary)}
+.ia-node.l1 .nm{color:var(--primary-deep)}
+.ia-node.l2{border-left:4px solid var(--link-blue)}
+.ia-node.l2 .nm{color:#004f99}
+.ia-node.l3{border-left:4px solid var(--success)}
+.ia-node.l3 .nm{color:#0a6b1f}
+.ia-node.global{background:linear-gradient(180deg,#fff,var(--tint-cream));
+  border:1px dashed var(--warning)}
+.ia-node.global .nm{color:#9c3f00}
+.level-tag{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--stone);
+  text-transform:uppercase;margin:14px 0 6px}
+.level-tag b{color:var(--primary)}
+
+/* ---------- 页面功能说明 ---------- */
+.table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--hairline);border-radius:var(--r-lg);
+  padding:8px 22px;box-shadow:var(--shadow-xs);margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--hairline);vertical-align:top}
+th{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--stone)}
+tr:last-child td{border-bottom:none}
+td:first-child{font-weight:600;color:var(--charcoal);white-space:nowrap;padding-right:16px}
+.mono{font-family:var(--font-mono);font-size:12px;color:var(--primary-deep);background:var(--tint-lavender);
+  padding:1px 6px;border-radius:4px;white-space:nowrap}
+
+/* ---------- 原则卡片 ---------- */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.prin-card{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-md);padding:16px 18px;
+  box-shadow:var(--shadow-xs);border-top:3px solid var(--primary)}
+.prin-card .pc-title{font-size:14px;font-weight:650;margin-bottom:6px}
+.prin-card ul{margin:0;padding-left:18px}
+.prin-card ul li{margin:5px 0;font-size:12.5px;color:var(--charcoal)}
+
+.tag{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap}
+.tg-green{background:var(--success-tint);color:#0a7a23}
+.tg-blue{background:var(--info-tint);color:#005bab}
+.tg-purple{background:var(--tint-lavender);color:var(--primary-deep)}
+.tg-orange{background:var(--warning-tint);color:#9c3f00}
+.tg-gray{background:var(--surface);color:var(--steel);border:1px solid var(--hairline)}
+
+.branch{border-left:3px solid var(--warning);background:var(--surface-soft);border-radius:0 6px 6px 0;
+  padding:5px 10px;margin-top:8px}
+.branch .bt{font-weight:600;font-size:11px;color:var(--warning);display:block;margin-bottom:2px}
+
+footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--hairline);color:var(--stone);
+  font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+@media (max-width:960px){.grid-2{grid-template-columns:1fr}.hero{padding:36px 28px}.hero h1{font-size:26px}
+  .wrap{padding:32px 18px 80px}}
+@media (max-width:640px){.section-title{font-size:19px}.hero h1{font-size:22px}.flow-box{padding:18px 12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <p class="eyebrow">Information Architecture · Web 端信息架构</p>
+  <h1>Recall AI <em>Web 端信息架构</em></h1>
+  <p class="sub">UX 产品经理视角的一级导航与页面层级设计 —— 层级控制在三级以内,贴合学生用户"少想、快达、有掌控感"的使用习惯。遵循 DESIGN.md v1.0 设计系统。</p>
+  <div class="meta">
+    <span class="chip">一级导航 5 项 + 全局入口</span>
+    <span class="chip">信息层级 ≤ 3 级</span>
+    <span class="chip">覆盖 9 大产品功能</span>
+    <span class="chip">配套 DESIGN.md v1.0</span>
+  </div>
+</header>
+
+<!-- ===================== 1 设计原则 ===================== -->
+<section class="section" id="s1">
+  <div class="section-head"><span class="section-num">PART 01</span><h2 class="section-title">设计前提:学生用户使用习惯</h2></div>
+  <p class="section-desc">先立三条 UX 判断,后续所有结构决策都由它们推导。</p>
+
+  <div class="grid-2">
+    <div class="prin-card">
+      <div class="pc-title">习惯 1:高频动作要「一步可达」</div>
+      <ul>
+        <li>错题录入与一键复习是学生最高频动作,必须 <b>全局可达</b>(悬浮按钮),不能藏在某页里</li>
+        <li>参照竞品教训:蜜蜂试卷"整理完就完了"、Anki"复习要靠自觉"——入口越浅,坚持率越高</li>
+      </ul>
+    </div>
+    <div class="prin-card">
+      <div class="pc-title">习惯 2:认知负担要「三级封顶」</div>
+      <ul>
+        <li>学生心智被课程/作业占据,导航结构必须扁平:任何功能 ≤ 3 次点击可达</li>
+        <li>层级拆解:一级导航(模块)→ 二级页面(列表/计划)→ 三级(详情/弹窗),杜绝第四级</li>
+      </ul>
+    </div>
+    <div class="prin-card">
+      <div class="pc-title">习惯 3:状态要「看得见的掌控感」</div>
+      <ul>
+        <li>学生需要知道自己"错在哪、该复习什么、进步没有"——学习台与数据看板承担这个职能</li>
+        <li>空状态不给惩罚感,给"下一步动作"引导(见 DESIGN.md Do's #4)</li>
+      </ul>
+    </div>
+    <div class="prin-card">
+      <div class="pc-title">习惯 4:AI 是「同桌」不是「玄学」</div>
+      <ul>
+        <li>AI 对话独立成一级导航(品牌差异化),但诊断结果必须可确认、可溯源(对应业务流程 U3 候选确认)</li>
+        <li>紫色 = AI 能力、蓝色 = 用户操作,色彩语义贯穿(见 DESIGN.md §2)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 2 一级导航 ===================== -->
+<section class="section" id="s2">
+  <div class="section-head"><span class="section-num">PART 02</span><h2 class="section-title">一级导航设计(5 + 1)</h2></div>
+  <p class="section-desc">桌面端左侧固定导航栏;移动端折叠为底部 Tab(首页/错题本/复习/我的)。「录入」「一键复习」为全局悬浮入口,不占导航位。</p>
+
+  <div class="flow-box">
+    <div class="flow-caption"><span class="t">一级导航结构</span><span class="badge">5 个功能模块 + 2 个全局入口</span></div>
+    <div class="mermaid">
+flowchart LR
+    Nav["一级导航栏"] --> H["🏠 学习台<br/>(今日复习/概览)"]
+    Nav --> Q["📚 错题本<br/>(列表/管理/详情)"]
+    Nav --> R["⚡ 复习<br/>(计划/一键复习)"]
+    Nav --> D["📊 数据看板<br/>(分析/导出)"]
+    Nav --> A["🤖 AI 助手<br/>(对话/诊断)"]
+    Nav --> S["⚙️ 设置与帮助<br/>(帮助中心/账号)"]
+
+    classDef nav fill:#fff,stroke:#5645d4,stroke-width:2px,color:#3a2a99
+    classDef item fill:#e6e0f5,stroke:#5645d4,color:#2f2680
+    classDef sub fill:#dcecfa,stroke:#0075de,color:#004f99
+    class Nav nav
+    class H,Q,R,D,A,S item
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>一级导航功能定位</h3>
+    <div class="table-wrap" style="box-shadow:none;border:none;padding:0">
+    <table>
+      <thead><tr><th>导航项</th><th>定位</th><th>核心任务</th><th>对应产品功能</th></tr></thead>
+      <tbody>
+        <tr><td><b>学习台</b></td><td>登录默认页 / 每日起点</td><td>今天该复习什么、错题概览、快捷录入</td><td>错题录入 · 复习计划(入口)</td></tr>
+        <tr><td><b>错题本</b></td><td>资产管理核心</td><td>查看/筛选/管理全部错题,进入详情</td><td>错题列表 · 错题本管理 · 导出</td></tr>
+        <tr><td><b>复习</b></td><td>行动中心</td><td>查看复习计划、执行一键复习、回顾历史</td><td>一键复习 · 复习计划</td></tr>
+        <tr><td><b>数据看板</b></td><td>成果反馈</td><td>掌握度、错因、趋势;导出学习报告</td><td>数据看板 · 导出</td></tr>
+        <tr><td><b>AI 助手</b></td><td>差异化能力</td><td>对话式诊断、讲题、变式生成建议</td><td>AI 对话</td></tr>
+        <tr><td><b>设置与帮助</b></td><td>低频入口</td><td>帮助中心、账号、AI 模型设置、通知、教材版本</td><td>帮助中心 · AI 模型设置</td></tr>
+      </tbody>
+    </table>
+    </div>
+    <div class="branch"><span class="bt">⚠ 全局入口(任何页面可见)</span><b>右下角悬浮按钮</b>:「+」录入(蓝色)·「⚡」一键复习(紫色)—— 对应学生习惯 1"高频动作一步可达"</div>
+  </div>
+</section>
+
+<!-- ===================== 3 页面层级 ===================== -->
+<section class="section" id="s3">
+  <div class="section-head"><span class="section-num">PART 03</span><h2 class="section-title">页面层级(三级封顶)</h2></div>
+  <p class="section-desc">全站信息层级严格控制在三级:一级导航 → 二级模块页 → 三级详情/弹窗。三级以下一律不建独立页面,用弹窗/抽屉/行内展开承接。</p>
+
+  <div class="level-tag"><b>L1</b> · 一级导航(6 个入口)</div>
+  <div class="ia-row">
+    <div class="ia-node l1"><div class="nm">学习台</div><div class="ds">登录默认页</div></div>
+    <div class="ia-node l1"><div class="nm">错题本</div><div class="ds">资产核心</div></div>
+    <div class="ia-node l1"><div class="nm">复习</div><div class="ds">行动中心</div></div>
+    <div class="ia-node l1"><div class="nm">数据看板</div><div class="ds">成果反馈</div></div>
+    <div class="ia-node l1"><div class="nm">AI 助手</div><div class="ds">差异化能力</div></div>
+    <div class="ia-node l1"><div class="nm">设置与帮助</div><div class="ds">低频入口</div></div>
+  </div>
+
+  <div class="level-tag"><b>L2</b> · 二级模块页(12 个页面)</div>
+  <div class="ia-row">
+    <div class="ia-node l2"><div class="nm">错题列表</div><div class="ds">筛选/搜索/排序</div></div>
+    <div class="ia-node l2"><div class="nm">错题管理</div><div class="ds">标签/批量/去重</div></div>
+    <div class="ia-node l2"><div class="nm">复习计划</div><div class="ds">每日目标/学科权重</div></div>
+    <div class="ia-node l2"><div class="nm">一键复习</div><div class="ds">闪卡/3级提示</div></div>
+    <div class="ia-node l2"><div class="nm">复习历史</div><div class="ds">日历/完成度</div></div>
+    <div class="ia-node l2"><div class="nm">掌握度矩阵</div><div class="ds">学科×考点热力图</div></div>
+    <div class="ia-node l2"><div class="nm">错因分析</div><div class="ds">TOP5/趋势</div></div>
+    <div class="ia-node l2"><div class="nm">学习报告</div><div class="ds">周报/月报</div></div>
+    <div class="ia-node l2"><div class="nm">AI 对话</div><div class="ds">问答/诊断/讲题</div></div>
+    <div class="ia-node l2"><div class="nm">帮助中心</div><div class="ds">FAQ/新手指引</div></div>
+    <div class="ia-node l2"><div class="nm">账号设置</div><div class="ds">资料/通知/教材</div></div>
+    <div class="ia-node l2"><div class="nm">数据管理</div><div class="ds">备份/导出/清理</div></div>
+    <div class="ia-node l2"><div class="nm">AI 模型设置</div><div class="ds">供应商/模型/密钥</div></div>
+  </div>
+
+  <div class="level-tag"><b>L3</b> · 三级详情/弹窗(深度终点,不再下钻)</div>
+  <div class="ia-row">
+    <div class="ia-node l3"><div class="nm">错题详情</div><div class="ds">题干/AI诊断/笔记</div></div>
+    <div class="ia-node l3"><div class="nm">诊断确认</div><div class="ds">候选知识点确认</div></div>
+    <div class="ia-node l3"><div class="nm">变式训练</div><div class="ds">作答/批改/复盘</div></div>
+    <div class="ia-node l3"><div class="nm">单题批改</div><div class="ds">过程分/错因</div></div>
+    <div class="ia-node l3"><div class="nm">导出弹窗</div><div class="ds">范围/格式/打印</div></div>
+    <div class="ia-node l3"><div class="nm">AI 讲解卡</div><div class="ds">图文/视频精讲</div></div>
+  </div>
+
+  <div class="ia-row" style="margin-top:16px">
+    <div class="ia-node global"><div class="nm">🌐 全局入口(悬浮/弹层)</div><div class="ds">「+」录入 · 「⚡」一键复习 · AI 对话浮层 —— 不占导航位,任何页面可唤起</div></div>
+  </div>
+</section>
+
+<!-- ===================== 4 导航树 ===================== -->
+<section class="section" id="s4">
+  <div class="section-head"><span class="section-num">PART 04</span><h2 class="section-title">完整导航树(Mermaid)</h2></div>
+  <p class="section-desc">三级结构的完整视图。虚线框 = 三级(详情/弹窗),均从二级页面进入,不再向下延伸。</p>
+
+  <div class="flow-box">
+    <div class="flow-caption"><span class="t">Web 端导航结构全景</span><span class="badge">3 级 · 6 入口 · 13 模块页 · 6 详情/弹窗</span></div>
+    <div class="mermaid">
+flowchart TD
+    HOME["🏠 学习台<br/>L2 页面"]
+    Q["📚 错题本<br/>L1 导航"]
+    R["⚡ 复习<br/>L1 导航"]
+    D["📊 数据看板<br/>L1 导航"]
+    AI["🤖 AI 助手<br/>L1 导航"]
+    SET["⚙️ 设置与帮助<br/>L1 导航"]
+
+    HOME --- Q
+    HOME --- R
+    HOME --- D
+    HOME --- AI
+    HOME --- SET
+
+    Q --> QL["错题列表<br/>L2"]
+    Q --> QM["错题管理<br/>L2"]
+    QL --> QD["错题详情<br/>L3"]
+    QL --> EX["导出弹窗<br/>L3"]
+    QD --> CON["诊断确认<br/>L3"]
+    QD --> VAR["变式训练<br/>L3"]
+    QM --> EX
+
+    R --> RP["复习计划<br/>L2"]
+    R --> RS["一键复习<br/>L2"]
+    R --> RH["复习历史<br/>L2"]
+    RS --> GD["单题批改<br/>L3"]
+    RS --> CON
+    RS --> VAR
+
+    D --> DM["掌握度矩阵<br/>L2"]
+    D --> DE["错因分析<br/>L2"]
+    D --> DR["学习报告<br/>L2"]
+    D --> EX
+    DR --> EX
+
+    AI --> AC["AI 对话<br/>L2"]
+    AC --> AIC["AI 讲解卡<br/>L3"]
+
+    SET --> HC["帮助中心<br/>L2"]
+    SET --> AU["账号设置<br/>L2"]
+    SET --> MPS["AI 模型设置<br/>L2"]
+    SET --> DMG["数据管理<br/>L2"]
+    DMG --> EX
+
+    G1["🌐 全局:「+」录入"] -.悬浮.-> HOME
+    G2["🌐 全局:「⚡」一键复习"] -.悬浮.-> HOME
+    G3["🌐 全局:AI 对话浮层"] -.悬浮.-> HOME
+
+    classDef l1 fill:#e6e0f5,stroke:#5645d4,stroke-width:2px,color:#2f2680
+    classDef l2 fill:#dcecfa,stroke:#0075de,stroke-width:1.5px,color:#004f99
+    classDef l3 fill:#d9f3e1,stroke:#1aae39,stroke-width:1.5px,color:#0a6b1f
+    classDef gl fill:#fef7d6,stroke:#e0b400,stroke-width:1.5px,color:#7a6400
+    classDef hm fill:#f8f5e8,stroke:#c8c4be,color:#5d5b54
+
+    class HOME hm
+    class Q,R,D,AI,SET l1
+    class QL,QM,RP,RS,RH,DM,DE,DR,AC,HC,AU,MPS,DMG l2
+    class QD,CON,VAR,EX,GD,AIC l3
+    class G1,G2,G3 gl
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 5 页面功能说明 ===================== -->
+<section class="section" id="s5">
+  <div class="section-head"><span class="section-num">PART 05</span><h2 class="section-title">页面功能说明</h2></div>
+  <p class="section-desc">每个页面的核心功能、关键交互与承载的产品能力。全部遵循 DESIGN.md 色彩语义(蓝=用户操作 / 紫=AI / 绿=系统)。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>层级</th><th>页面</th><th>核心功能</th><th>关键交互 / 设计要点</th></tr></thead>
+      <tbody>
+        <tr><td>L1</td><td>学习台</td><td>今日复习卡片 · 学习概览 · 最近动态 · 快捷入口</td>
+          <td>首屏即"今日待复习 N 题 + 开始按钮"(绿);空状态引导"录第一道错题";显示本周录入/掌握率/连胜</td></tr>
+        <tr><td>L2</td><td>错题列表</td><td>筛选 · 搜索 · 排序 · 分页</td>
+          <td>左侧筛选:学科/考点/状态(已掌握·模糊·不会)/<b>错误次数</b>(竞品差评点,已吸收);行内显示 AI 诊断标签(紫)+ 掌握度徽章</td></tr>
+        <tr><td>L2</td><td>错题管理</td><td>标签编辑 · 批量操作 · 去重合并 · 删除</td>
+          <td>批量选择后底部操作栏(归类/导出/删除);自动去重提示(向量相似度 &gt; 0.95 合并)</td></tr>
+        <tr><td>L3</td><td>错题详情</td><td>题干/答案 · AI 诊断 · 笔记 · 错因 · 变式入口</td>
+          <td>Tab 折叠:题干 → 解析 → AI 诊断 → 我的笔记;诊断带置信度与"重新诊断";一键"我要强化"(进变式)</td></tr>
+        <tr><td>L3</td><td>诊断确认</td><td>候选知识点确认 · 人工修正</td>
+          <td>置信度 &lt; 0.7 时弹出;Top-3 候选卡片(薰衣草底)+ "都不对"自助补录;确认后回写掌握度</td></tr>
+        <tr><td>L2</td><td>复习计划</td><td>每日目标 · 学科权重 · 推送时段 · 考前模式</td>
+          <td>目标题量滑块(5-20 题);学科权重拖拽;考研/高考模式切换(考前 7 天自动加权薄弱考点)</td></tr>
+        <tr><td>L2</td><td>一键复习</td><td>闪卡作答 · 3 级提示 · 自评 · 错因归类</td>
+          <td>全屏专注模式(大留白);5s 无思路解锁提示①考点→②步骤→③解析;自评:已掌握/模糊/不会(诚实提示文案)</td></tr>
+        <tr><td>L2</td><td>复习历史</td><td>日历视图 · 完成度 · 正确率 · 连续打卡</td>
+          <td>月历热力格(薄荷绿深浅);点击日期查看当日明细;连胜天数激励徽章</td></tr>
+        <tr><td>L3</td><td>变式训练</td><td>变式题作答 · 即时批改 · 复盘对比</td>
+          <td>1-3 题难度阶梯;批改输出过程分 + 错因 + 与原错题"思维差异"对比;连续 3 次失败 → 专项辅导入口</td></tr>
+        <tr><td>L2</td><td>掌握度矩阵</td><td>学科×考点热力图 · 薄弱点列表</td>
+          <td>热力图薄荷绿渐变(灰=未学→深绿=掌握);点击考点下钻错题列表;薄弱考点高亮并给"去强化"按钮</td></tr>
+        <tr><td>L2</td><td>错因分析</td><td>错因 TOP5 · 趋势曲线 · 进步/退步考点</td>
+          <td>横向条形图(暖橙);双周对比;进步最快/退步考点并列展示</td></tr>
+        <tr><td>L2</td><td>学习报告</td><td>周报/月报 · 改进建议 · 分享</td>
+          <td>自动生成建议条目(可点赞/忽略,反哺画像);一键生成图片分享给家长/老师</td></tr>
+        <tr><td>L3</td><td>导出弹窗</td><td>范围选择 · 格式选择 · 打印</td>
+          <td>范围:选中错题/学科/全部;格式:PDF(推荐)/Word/图片;预览后导出,支持微信分享</td></tr>
+        <tr><td>L2</td><td>AI 对话</td><td>自然语言问答 · 讲题 · 变式建议 · 计划咨询</td>
+          <td>全站最高 z-index 浮层(毛玻璃);快捷提问 chip("帮我讲讲这道题""生成同类变式");紫色 AI 标识,输出可溯源</td></tr>
+        <tr><td>L3</td><td>AI 讲解卡</td><td>图文讲解 · 视频精讲 · 知识点关联</td>
+          <td>从对话/错题详情唤起;视频精讲为付费增强项(核心闭环不收费);讲解带"AI 生成"标识</td></tr>
+        <tr><td>L2</td><td>帮助中心</td><td>常见问题 · 新手指引 · 意见反馈</td>
+          <td>FAQ 按场景分组(录入/复习/导出/AI);新手指引 3 步图文;反馈直达产品团队</td></tr>
+        <tr><td>L2</td><td>账号设置</td><td>资料 · 通知偏好 · 教材版本 · 登录设备</td>
+          <td>身份(高中/大学/考研)可修改;通知时段按画像默认(高中生 21:30 / 考研 22:00)</td></tr>
+        <tr><td>L2</td><td>数据管理</td><td>云端同步 · 备份 · 导出 · 注销</td>
+          <td>同步状态展示;一键导出全量数据(JSON/PDF);注销需二次确认(防误删)</td></tr>
+        <tr><td>L2</td><td>AI 模型设置</td><td>供应商管理 · 模型选择 · API Key · 用量配额</td>
+          <td>供应商卡片(DeepSeek/OpenAI/GLM/通义)含连接状态徽章与默认标记;API Key 掩码输入可切换可见(仅存服务端加密);诊断/讲解/变式三类任务可分模型;连接失败自动降级备选并在 AI 对话顶部透明提示</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===================== 6 层级规则 ===================== -->
+<section class="section" id="s6">
+  <div class="section-head"><span class="section-num">PART 06</span><h2 class="section-title">层级控制规则</h2></div>
+  <p class="section-desc">三条硬性规则,确保信息架构不失控。</p>
+
+  <div class="grid-2">
+    <div class="prin-card">
+      <div class="pc-title">规则 1:三级封顶,绝不四层</div>
+      <ul>
+        <li>任何功能 ≤ 3 次点击可达(导航 → 模块页 → 详情/弹窗)</li>
+        <li>三级之后的需求用<b>弹窗/抽屉/行内展开</b>承接,不建新页面</li>
+        <li>反例禁止:错题详情 → 变式 → 解析 → 编辑笔记(四层)必须拆平</li>
+      </ul>
+    </div>
+    <div class="prin-card">
+      <div class="pc-title">规则 2:高频全局化,低频靠边站</div>
+      <ul>
+        <li>录入、一键复习 = 全局悬浮,不占导航位</li>
+        <li>导出 = 错题本/看板页内操作 + 设置中全量导出,不做独立导航</li>
+        <li>帮助中心 = 低频,收进"设置与帮助"而非独立一级导航</li>
+      </ul>
+    </div>
+    <div class="prin-card">
+      <div class="pc-title">规则 3:移动端折叠策略</div>
+      <ul>
+        <li>桌面侧栏 → 移动端底部 Tab(首页/错题本/复习/我的)</li>
+        <li>数据看板、AI 助手在移动端降级为 Tab 内入口或二级</li>
+        <li>三级页面(错题详情/变式)移动端用全屏页保持专注</li>
+      </ul>
+    </div>
+    <div class="prin-card">
+      <div class="pc-title">规则 4:色彩语义贯穿层级</div>
+      <ul>
+        <li>蓝色入口 = 用户操作(录入/筛选)</li>
+        <li>紫色入口 = AI 能力(诊断/对话/变式)</li>
+        <li>绿色状态 = 系统反馈(掌握/完成/同步)</li>
+        <li>导航高亮统一用品牌紫 + 薰衣草底(见 DESIGN.md §4.4)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Recall AI 智能错题本 · Web 端信息架构 v1.0</span>
+  <span>遵循 DESIGN.md v1.0 设计系统</span>
+  <span>配套:业务流程设计 v2.0 · MVP 技术文档 v1.0 · 竞品分析 v1.0</span>
+</footer>
+
+</div>
+
+<script>
+mermaid.initialize({
+  startOnLoad:true,theme:'base',
+  themeVariables:{
+    fontFamily:'"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Inter",sans-serif',
+    fontSize:'13px',primaryColor:'#ffffff',primaryTextColor:'#1a1a1a',
+    primaryBorderColor:'#c8c4be',lineColor:'#787671',secondaryColor:'#f6f5f4',
+    tertiaryColor:'#fafaf9',background:'#ffffff'
+  },
+  flowchart:{curve:'basis',htmlLabels:true,useMaxWidth:true,nodeSpacing:32,rankSpacing:44,padding:10}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recall AI 智能错题本 · 竞品分析报告</title>
+<style>
+/* ============================================================
+   Recall AI · 设计系统 (延续业务文档/技术文档, Notion × Linear)
+   ============================================================ */
+:root{
+  --primary:#5645d4; --primary-pressed:#4534b3; --primary-deep:#3a2a99;
+  --on-primary:#ffffff; --link-blue:#0075de; --link-blue-pressed:#005bab;
+  --brand-purple:#7b3ff2; --brand-purple-300:#d6b6f6;
+  --success:#1aae39; --success-tint:#d9f3e1;
+  --warning:#dd5b00; --warning-tint:#ffe8d4;
+  --error:#e03131; --error-tint:#fde0ec;
+  --info:#0075de; --info-tint:#dcecfa;
+  --tint-mint:#d9f3e1; --tint-lavender:#e6e0f5; --tint-sky:#dcecfa;
+  --tint-peach:#ffe8d4; --tint-yellow:#fef7d6; --tint-cream:#f8f5e8;
+  --canvas:#ffffff; --surface:#f6f5f4; --surface-soft:#fafaf9;
+  --hairline:#e5e3df; --hairline-soft:#ede9e4; --hairline-strong:#c8c4be;
+  --ink:#1a1a1a; --charcoal:#37352f; --slate:#5d5b54; --steel:#787671;
+  --stone:#a4a097; --muted:#bbb8b1;
+  --font-sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC","Inter",-apple-system,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Consolas,"JetBrains Mono",monospace;
+  --r-sm:6px; --r-md:10px; --r-lg:16px;
+  --shadow-xs:0 1px 2px rgba(10,21,48,.05);
+  --shadow-sm:0 1px 3px rgba(10,21,48,.06),0 1px 2px rgba(10,21,48,.04);
+  --shadow-md:0 4px 12px rgba(10,21,48,.08),0 2px 4px rgba(10,21,48,.04);
+  --shadow-lg:0 12px 32px rgba(10,21,48,.10),0 4px 8px rgba(10,21,48,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--surface-soft);color:var(--ink);
+  line-height:1.65;font-size:14px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:56px 32px 120px}
+
+/* ---------- Hero ---------- */
+.hero{background:linear-gradient(160deg,#0a1530 0%,#1a2a52 55%,#2d2a66 100%);
+  border-radius:20px;padding:48px 52px;color:#fff;position:relative;overflow:hidden;margin-bottom:36px}
+.hero::before{content:"";position:absolute;right:-60px;top:-60px;width:280px;height:280px;
+  background:radial-gradient(circle,rgba(123,63,242,.35),transparent 70%)}
+.hero::after{content:"";position:absolute;right:80px;bottom:-80px;width:220px;height:220px;
+  background:radial-gradient(circle,rgba(245,215,94,.18),transparent 70%)}
+.hero .eyebrow{font-size:12px;font-weight:600;letter-spacing:.14em;color:var(--brand-purple-300);
+  text-transform:uppercase;margin:0 0 10px}
+.hero h1{font-size:34px;font-weight:650;line-height:1.15;letter-spacing:-.02em;margin:0 0 12px}
+.hero h1 em{font-style:normal;color:#f5d75e}
+.hero .sub{font-size:15px;color:rgba(255,255,255,.78);max-width:680px;margin:0 0 22px}
+.hero .meta{display:flex;gap:10px;flex-wrap:wrap}
+.hero .chip{padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.18);font-size:12px;color:rgba(255,255,255,.9)}
+
+/* ---------- TOC ---------- */
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:0 0 40px;padding:0;list-style:none}
+.toc li a{display:block;padding:12px 14px;background:#fff;border:1px solid var(--hairline);
+  border-radius:var(--r-md);color:var(--charcoal);text-decoration:none;font-size:13px;box-shadow:var(--shadow-xs)}
+.toc li a:hover{border-color:var(--primary);color:var(--primary)}
+.toc li a .tn{font-size:10px;font-weight:700;color:var(--primary);letter-spacing:.08em;display:block;margin-bottom:2px}
+
+/* ---------- Section ---------- */
+.section{margin:52px 0}
+.section-head{display:flex;align-items:baseline;gap:14px;margin:0 0 8px}
+.section-num{font-size:13px;font-weight:700;color:var(--primary);background:var(--tint-lavender);
+  padding:4px 12px;border-radius:999px;white-space:nowrap}
+.section-title{font-size:23px;font-weight:650;letter-spacing:-.01em;margin:0}
+.section-desc{color:var(--slate);font-size:13.5px;margin:0 0 20px}
+
+/* ---------- Card / table ---------- */
+.card{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-lg);padding:20px 22px;
+  box-shadow:var(--shadow-xs);margin-bottom:16px}
+.card h3{margin:0 0 10px;font-size:15px;font-weight:650}
+.card p{margin:0 0 8px;color:var(--charcoal)}
+.table-wrap{overflow-x:auto;background:#fff;border:1px solid var(--hairline);border-radius:var(--r-lg);
+  padding:8px 22px;box-shadow:var(--shadow-xs);margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--hairline);vertical-align:top}
+th{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--stone)}
+tr:last-child td{border-bottom:none}
+td:first-child{font-weight:600;color:var(--charcoal);white-space:nowrap;padding-right:16px}
+.comp-row td:first-child{background:var(--tint-lavender);color:var(--primary-deep)}
+.mono{font-family:var(--font-mono);font-size:12px;color:var(--primary-deep);background:var(--tint-lavender);
+  padding:1px 6px;border-radius:4px;white-space:nowrap}
+
+/* ---------- Tags ---------- */
+.tag{display:inline-block;padding:2px 10px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap}
+.tg-green{background:var(--success-tint);color:#0a7a23}
+.tg-blue{background:var(--info-tint);color:#005bab}
+.tg-purple{background:var(--tint-lavender);color:var(--primary-deep)}
+.tg-orange{background:var(--warning-tint);color:#9c3f00}
+.tg-red{background:var(--error-tint);color:#a0233c}
+.tg-gray{background:var(--surface);color:var(--steel);border:1px solid var(--hairline)}
+
+/* ---------- Review cards ---------- */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.review-card{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-md);padding:16px 18px;
+  box-shadow:var(--shadow-xs)}
+.review-card .rc-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.review-card .rc-app{font-size:14px;font-weight:650}
+.review-card .rc-src{font-size:11px;color:var(--stone)}
+.review-card ul{margin:0;padding-left:18px}
+.review-card ul li{margin:6px 0;font-size:12.5px;color:var(--charcoal);line-height:1.6}
+.review-card.good{border-top:3px solid var(--success)}
+.review-card.bad{border-top:3px solid var(--error)}
+
+/* ---------- Borrow cards ---------- */
+.borrow-card{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-md);padding:16px 18px;
+  box-shadow:var(--shadow-xs);border-left:4px solid var(--primary)}
+.borrow-card .bc-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.borrow-card .bc-title{font-size:14px;font-weight:650}
+.borrow-card .bc-what{font-size:12.5px;color:var(--slate);margin:0 0 8px}
+.borrow-card .bc-how{font-size:12.5px;color:var(--charcoal);background:var(--surface-soft);
+  border-radius:8px;padding:8px 12px;margin:0}
+.borrow-card .bc-how b{color:var(--primary-deep)}
+
+/* ---------- Positioning ---------- */
+.pos-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.pos-card{background:#fff;border:1px solid var(--hairline);border-radius:var(--r-md);padding:16px 18px;
+  box-shadow:var(--shadow-xs);text-align:center}
+.pos-card .pos-name{font-size:14px;font-weight:650;margin-bottom:4px}
+.pos-card .pos-quote{font-size:12px;color:var(--slate);margin:0 0 10px}
+.pos-card .pos-score{font-size:28px;font-weight:700;line-height:1}
+.pos-card .pos-axis{font-size:11px;color:var(--stone);margin-top:4px}
+.pos-us{border:2px solid var(--primary);background:linear-gradient(180deg,#fff,var(--tint-lavender))}
+.pos-us .pos-score{color:var(--primary)}
+
+.branch{border-left:3px solid var(--warning);background:var(--surface-soft);border-radius:0 6px 6px 0;
+  padding:5px 10px;margin-top:8px}
+.branch .bt{font-weight:600;font-size:11px;color:var(--warning);display:block;margin-bottom:2px}
+
+/* ---------- Footer ---------- */
+footer{margin-top:72px;padding-top:24px;border-top:1px solid var(--hairline);color:var(--stone);
+  font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+@media (max-width:960px){.grid-2{grid-template-columns:1fr}.hero{padding:36px 28px}.hero h1{font-size:26px}
+  .wrap{padding:32px 18px 80px}}
+@media (max-width:640px){.section-title{font-size:19px}.hero h1{font-size:22px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <p class="eyebrow">Competitor Analysis · 竞品分析报告</p>
+  <h1>Recall AI <em>智能错题本</em></h1>
+  <p class="sub">对标市面上主流错题管理与学习工具,基于公开用户评价(App Store / 黑猫投诉 / 媒体实测)整理,输出「核心功能对比 → 好评 → 差评 → 借鉴清单」完整分析。</p>
+  <div class="meta">
+    <span class="chip">对标 4 款:蜜蜂试卷 / 作业帮 / 小猿搜题 / Anki</span>
+    <span class="chip">辅证:豆包 / 爱作业 / 优学错题本</span>
+    <span class="chip">信息源:公开评价 + 2026 媒体实测</span>
+  </div>
+</header>
+
+<!-- ===================== TOC ===================== -->
+<ul class="toc">
+  <li><a href="#s1"><span class="tn">PART 01</span>竞品选择与格局</a></li>
+  <li><a href="#s2"><span class="tn">PART 02</span>核心功能对比</a></li>
+  <li><a href="#s3"><span class="tn">PART 03</span>用户好评点</a></li>
+  <li><a href="#s4"><span class="tn">PART 04</span>用户差评点</a></li>
+  <li><a href="#s5"><span class="tn">PART 05</span>借鉴清单(核心输出)</a></li>
+  <li><a href="#s6"><span class="tn">PART 06</span>差异化定位</a></li>
+</ul>
+
+<!-- ===================== 1 格局 ===================== -->
+<section class="section" id="s1">
+  <div class="section-head"><span class="section-num">PART 01</span><h2 class="section-title">竞品选择与市场格局</h2></div>
+  <p class="section-desc">错题本赛道分为三类玩家:独立错题工具(蜜蜂试卷/优学)、题库生态大厂(作业帮/小猿)、记忆算法工具(Anki)。Recall AI 的定位介于三者之间。</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>竞品</th><th>类型</th><th>核心定位</th><th>用户群</th><th>与 Recall AI 的关系</th></tr></thead>
+      <tbody>
+        <tr><td><b>蜜蜂试卷</b></td><td><span class="tag tg-blue">独立工具</span></td><td>试卷擦除 + 错题整理 + 组卷打印</td><td>中小学家长为主</td><td>直接竞品:录入/整理赛道</td></tr>
+        <tr><td><b>作业帮</b></td><td><span class="tag tg-purple">生态大厂</span></td><td>搜题 + 题库 + 直播课 + 硬件全家桶</td><td>K12 学生 + 家长</td><td>竞品:生态碾压,但体验臃肿</td></tr>
+        <tr><td><b>小猿搜题</b></td><td><span class="tag tg-purple">生态大厂</span></td><td>搜题 + 视频讲解 + 错题本</td><td>K12 学生</td><td>竞品:题库与讲解强,无同类练习</td></tr>
+        <tr><td><b>Anki</b></td><td><span class="tag tg-gray">算法工具</span></td><td>间隔重复记忆(SM-2),通用闪卡</td><td>考研/医学生/语言学习者</td><td>算法对标:复习机制的"鼻祖"</td></tr>
+        <tr><td>豆包</td><td><span class="tag tg-gray">通用 AI</span></td><td>通用对话 + 启发式讲题</td><td>泛用户</td><td>互补:讲题能力参照,无错题管理</td></tr>
+        <tr><td>爱作业</td><td><span class="tag tg-blue">独立工具</span></td><td>拍照批改作业(口算/应用题)</td><td>低年级家长</td><td>参考:批改交互,功能单一</td></tr>
+        <tr><td>优学错题本</td><td><span class="tag tg-blue">独立工具</span></td><td>iOS 轻量错题 + 自定义标签 + iCloud</td><td>苹果生态学生</td><td>参考:轻量化与自定义标签</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>市场关键洞察(基于公开评价归纳)</h3>
+    <ul>
+      <li><b>录入是刚需,但"录入完"是大多数产品的终点</b>:多数工具止步于"存得下、打得出",缺"学得会"——主动诊断与复习闭环是空白</li>
+      <li><b>家长 vs 学生是两群用户</b>:家长要「批改/打印/省时间」,学生要「讲明白/记得住」,独立工具多偏向家长</li>
+      <li><b>题库大厂体验债严重</b>:广告、诱导消费、会员墙是差评重灾区,纯工具赛道存在"干净体验"的差异化空间</li>
+      <li><b>间隔重复被验证有效,但"制卡成本"劝退</b>:Anki 证明了算法价值,也暴露了内容生产门槛——自动生成卡片(错题→复习卡)是机会</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== 2 功能对比 ===================== -->
+<section class="section" id="s2">
+  <div class="section-head"><span class="section-num">PART 02</span><h2 class="section-title">核心功能对比</h2></div>
+  <p class="section-desc">按 Recall AI 六大核心能力横向对比。● 完整支持 ◐ 部分/付费支持 ○ 不支持</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>功能维度</th><th>Recall AI(规划)</th><th>蜜蜂试卷</th><th>作业帮</th><th>小猿搜题</th><th>Anki</th></tr></thead>
+      <tbody>
+        <tr class="comp-row"><td colspan="6" style="background:var(--tint-lavender);color:var(--primary-deep);font-weight:700">录入与整理</td></tr>
+        <tr><td>拍照 OCR 录入</td><td>● 公式+文字</td><td>● 试卷级扫描强</td><td>● 搜题级</td><td>● 搜题级</td><td>○ 需自制卡</td></tr>
+        <tr><td>手写 / 文字录入</td><td>●</td><td>◐ 仅拍照</td><td>◐</td><td>◐</td><td>◐ 手动输入</td></tr>
+        <tr><td>错题分类管理</td><td>● 学科/章节/知识点</td><td>● 年级/学科/题型</td><td>● 基础分类</td><td>● 基础分类</td><td>● 卡组/标签</td></tr>
+        <tr><td>错题去重合并</td><td>● 向量相似度</td><td>○</td><td>○</td><td>○</td><td>○</td></tr>
+        <tr><td>组卷打印导出</td><td>◐ 规划中(后置)</td><td>● 核心强项</td><td>◐ 会员+水印</td><td>◐</td><td>○</td></tr>
+        <tr class="comp-row"><td colspan="6" style="background:var(--tint-lavender);color:var(--primary-deep);font-weight:700">AI 能力</td></tr>
+        <tr><td>AI 知识点诊断</td><td>● 图谱 RAG + 置信度</td><td>◐ 基础解析</td><td>● 解析+精讲</td><td>● 解析+视频</td><td>○</td></tr>
+        <tr><td>错因归因分析</td><td>● 审题/计算/概念</td><td>○</td><td>◐</td><td>◐</td><td>○</td></tr>
+        <tr><td>启发式讲解(不给答案)</td><td>● 3 级提示梯度</td><td>○ 直接给答案</td><td>◐ 标准解析</td><td>◐ 标准解析</td><td>○</td></tr>
+        <tr><td>变式题生成</td><td>● 同考点变式+质检</td><td>◐ 举一反三(质量差评)</td><td>◐ 同类题推荐</td><td>○ 无同类练习</td><td>○</td></tr>
+        <tr class="comp-row"><td colspan="6" style="background:var(--tint-lavender);color:var(--primary-deep);font-weight:700">复习与数据</td></tr>
+        <tr><td>间隔重复复习</td><td>● SM-2 + 遗忘曲线</td><td>○ 仅组卷重练</td><td>○ 弱</td><td>○ 弱</td><td>● 算法鼻祖</td></tr>
+        <tr><td>学习数据分析</td><td>● 周报/掌握度矩阵</td><td>◐ 简单统计</td><td>◐ 学情报告</td><td>◐</td><td>● 统计强(无教育语义)</td></tr>
+        <tr><td>个性化复习调度</td><td>● 优先级权重</td><td>○</td><td>◐</td><td>○</td><td>● 纯间隔,无考点权重</td></tr>
+        <tr><td>激励/打卡机制</td><td>● 规划:连胜/成就</td><td>○</td><td>◐ 学习币</td><td>◐</td><td>○ 无(被诟病)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>一句话总结竞品格局</h3>
+    <ul>
+      <li><b>蜜蜂试卷</b> = "错题的搬运工":整理/组卷/打印做到极致,但"学"的环节(诊断/复习)几乎没有</li>
+      <li><b>作业帮/小猿</b> = "答案的图书馆":题库海量、讲解丰富,但商业化过重、复习机制薄弱</li>
+      <li><b>Anki</b> = "记忆的健身房":复习算法科学,但内容生产全靠自己,没有教育语义</li>
+      <li><b>Recall AI 的机会</b> = "错题的教练":录入的轻 + 诊断的懂 + 复习的科学,全自动闭环</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== 3 好评 ===================== -->
+<section class="section" id="s3">
+  <div class="section-head"><span class="section-num">PART 03</span><h2 class="section-title">用户好评点</h2></div>
+  <p class="section-desc">归纳自公开评价:App Store 评论区、媒体实测报道、用户社区。每类产品被认可的核心价值。</p>
+
+  <div class="grid-2">
+    <div class="review-card good">
+      <div class="rc-head"><span class="rc-app">蜜蜂试卷</span><span class="tag tg-green">好评集中点</span><span class="rc-src">App Store / 媒体实测</span></div>
+      <ul>
+        <li><b>试卷一键擦除手写笔迹</b>:识别干净,"还原空白试卷"体验惊艳,字迹过重时才有影响</li>
+        <li><b>错题收集效率高</b>:一套卷几分钟整理完,免手抄,直接框选即存</li>
+        <li><b>组卷打印闭环完整</b>:勾选错题 → 生成新卷 → PDF/Word 导出打印,适合反复刷</li>
+        <li><b>基础功能免费可用</b>:轻度用户(拍照存题)不付费也能用,口碑起点好</li>
+      </ul>
+    </div>
+    <div class="review-card good">
+      <div class="rc-head"><span class="rc-app">作业帮 / 小猿</span><span class="tag tg-green">好评集中点</span><span class="rc-src">媒体实测 / 用户社区</span></div>
+      <ul>
+        <li><b>题库海量 + 解析规范</b>:题干→思路→步骤→答案一气呵成,公式清晰</li>
+        <li><b>视频讲解丰富</b>:随题附老师讲题视频,听不懂可看多遍</li>
+        <li><b>同类考点题推荐</b>:作业帮基于大数据推同类题,帮薄弱点少量刷题</li>
+        <li><b>生态完整</b>:搜题-错题-课程-硬件一条龙,家长图省心</li>
+      </ul>
+    </div>
+    <div class="review-card good">
+      <div class="rc-head"><span class="rc-app">Anki</span><span class="tag tg-green">好评集中点</span><span class="rc-src">深度用户分析</span></div>
+      <ul>
+        <li><b>间隔重复科学有效</b>:记忆保留率提升 200%-300%,按遗忘曲线自动安排复习</li>
+        <li><b>主动回忆(Active Recall)</b>:先想后看,学习发生在"不舒适"的回忆过程</li>
+        <li><b>诚实反馈驱动算法</b>:自评(Easy/Good/Hard/Again)直接改变下次间隔,越诚实越高效</li>
+        <li><b>免费开源 + 跨平台 + 可同步</b>:万级卡片规模不卡,插件生态丰富</li>
+      </ul>
+    </div>
+    <div class="review-card good">
+      <div class="rc-head"><span class="rc-app">豆包(通用 AI 参照)</span><span class="tag tg-green">好评集中点</span><span class="rc-src">媒体实测</span></div>
+      <ul>
+        <li><b>启发式教学</b>:像有经验的老师,分步骤推导而不是直接给答案,锻炼解题逻辑</li>
+        <li><b>能诊断"病因"</b>:分析思路错误点,指出薄弱环节,总结解题模板</li>
+        <li><b>无广告无推销</b>:体验清爽,不绑架商业化</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 4 差评 ===================== -->
+<section class="section" id="s4">
+  <div class="section-head"><span class="section-num">PART 04</span><h2 class="section-title">用户差评点</h2></div>
+  <p class="section-desc">差评是产品机会的镜子。标注来源,重点看"共性差评"——那是行业级机会。</p>
+
+  <div class="grid-2">
+    <div class="review-card bad">
+      <div class="rc-head"><span class="rc-app">蜜蜂试卷</span><span class="tag tg-red">差评集中点</span><span class="rc-src">App Store 真实评论</span></div>
+      <ul>
+        <li><b>错题筛选功能简陋</b>:"不能按错误次数筛选""日期筛选不能自定义"——顽固错题找不到</li>
+        <li><b>稳定性问题</b>:查看答案图片放大"十次九次卡",只能退出重进</li>
+        <li><b>识别误判</b>:字迹潦草或正确答案会被误判为错;语文批改偏差明显</li>
+        <li><b>举一反三质量差</b>:"真的不好用"——变式题是它的软肋</li>
+        <li><b>付费墙</b>:Pro 版云同步收费(免费仅 3 次/月)、高级组卷要会员</li>
+      </ul>
+    </div>
+    <div class="review-card bad">
+      <div class="rc-head"><span class="rc-app">作业帮 / 小猿</span><span class="tag tg-red">差评集中点</span><span class="rc-src">黑猫投诉 / 用户社区</span></div>
+      <ul>
+        <li><b>会员收费贵且权益混乱</b>:VIP 月 15-19.9 元,学生"付不起";超级会员/普通会员权益不透明,买完发现功能仍被锁</li>
+        <li><b>AI 解析质量差</b>:很多题"答非所问、不知所云、误导性强",带图题识别不准(数学物理重灾区)</li>
+        <li><b>自动续费陷阱 + 虚假宣传</b>:低价体验自动转高价包月,关闭流程繁琐(黑猫投诉高频)</li>
+        <li><b>营销骚扰严重</b>:广告多、推销电话、诱导加企业微信,"想安静用个工具很难"</li>
+        <li><b>水印与功能锁</b>:导出打印带 logo,基础功能被会员墙包裹</li>
+      </ul>
+    </div>
+    <div class="review-card bad">
+      <div class="rc-head"><span class="rc-app">Anki</span><span class="tag tg-red">差评集中点</span><span class="rc-src">深度用户分析</span></div>
+      <ul>
+        <li><b>制卡成本极高</b>:"500 词卡组 5-10 小时"——内容生产成为最大学习障碍</li>
+        <li><b>卡片脱离语境</b>:孤立闪卡记忆留存率比语境学习低 40%+</li>
+        <li><b>激励机制薄弱</b>:无打卡日历、无成就、无分享,普通用户放弃率高</li>
+        <li><b>中断即债务</b>:缺勤几天,复习量翻倍堆积,焦虑循环</li>
+        <li><b>不能教理解</b>:只维护记忆,不教推理,概念学科用 Anki 会"浅学习"</li>
+      </ul>
+    </div>
+    <div class="review-card bad">
+      <div class="rc-head"><span class="rc-app">爱作业 / 优学(辅证)</span><span class="tag tg-red">差评集中点</span><span class="rc-src">媒体实测 / 用户反馈</span></div>
+      <ul>
+        <li><b>爱作业准确性差</b>:结果"乱七八糟",仅给参考答案无解析,手写/带单位/填空题识别失败</li>
+        <li><b>优学仅 iOS</b>:无安卓端,苹果生态外用户不可用</li>
+        <li><b>同类产品通病</b>:深度复习功能缺失——"整理完就完了",没有后续的复习与掌握度追踪</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>跨产品共性差评(行业级机会)</h3>
+    <ul>
+      <li><b>共性 1 — "整理即终点"</b>:所有工具都在"存"上内卷,几乎没人真正管"学没学会"</li>
+      <li><b>共性 2 — 变式/同类题质量差</b>:作业帮推荐机械、蜜蜂举一反三被骂,高质量变式是差异化高地</li>
+      <li><b>共性 3 — 付费墙伤害核心价值</b>:把"看解析""打印"这种刚需锁进会员,引发大量投诉</li>
+      <li><b>共性 4 — 无激励难坚持</b>:学习类工具普遍缺游戏化与正向反馈,留存靠用户自觉</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ===================== 5 借鉴 ===================== -->
+<section class="section" id="s5">
+  <div class="section-head"><span class="section-num">PART 05</span><h2 class="section-title">我们可以借鉴什么(核心输出)</h2></div>
+  <p class="section-desc">12 条借鉴项,按「优先落地」排序,每条含:借自谁 / 为什么 / 怎么落地到 Recall AI。</p>
+
+  <div class="grid-2">
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">① 把「录入」做到极致轻</span><span class="tag tg-blue">借自 蜜蜂试卷</span></div>
+      <p class="bc-what">蜜蜂靠"一键擦除+框选即存"建立了整理效率心智,这是它最大的好评来源。</p>
+      <p class="bc-how"><b>落地:</b>M1 必做 OCR 静默化——拍完自动识别、自动切题、自动入库,用户零操作干预;低置信才弹修正。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">② 错题筛选按「错误次数」</span><span class="tag tg-orange">借自 蜜蜂差评</span></div>
+      <p class="bc-what">真实差评:"我只想筛选反复错的题,现在做不到"——顽固错题是最高价值资产。</p>
+      <p class="bc-how"><b>落地:</b>题库支持多条件筛选:错误次数 / 最近错误日期 / 掌握度 / 考点;「顽固错题」做成独立入口。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">③ 启发式教学,不给答案</span><span class="tag tg-purple">借自 豆包好评</span></div>
+      <p class="bc-what">豆包被赞"像有经验的老师分步推导",而蜜蜂直接给答案被诟病"滋养依赖"。</p>
+      <p class="bc-how"><b>落地:</b>坚持 3 级提示梯度(考点→步骤→解析)作为复习交互默认,解析逐步解锁而非一次全给。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">④ 诚实自评驱动算法</span><span class="tag tg-blue">借自 Anki</span></div>
+      <p class="bc-what">Anki 的核心智慧:自评直接改变下次间隔,诚实反馈比"智能"更重要。</p>
+      <p class="bc-how"><b>落地:</b>复习交互保留三级自评(已掌握/模糊/不会),明确告诉用户"如实选择,算法才准";模糊/不会重置 1 天。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">⑤ 自动制卡,消灭生产成本</span><span class="tag tg-red">借自 Anki 差评</span></div>
+      <p class="bc-what">Anki 最大劝退点是"500 词制卡 5-10 小时"——内容生产门槛扼杀坚持。</p>
+      <p class="bc-how"><b>落地:</b>拍照即制卡:OCR 题干 + AI 生成考点卡 + 自动挂到复习队列,用户零制卡成本——这是 Recall AI 对 Anki 的降维打击。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">⑥ 复习要有激励与节奏</span><span class="tag tg-orange">借自 Anki 差评</span></div>
+      <p class="bc-what">Anki"无打卡、无成就、无分享"被普遍认为导致放弃;中断几天就负债累累。</p>
+      <p class="bc-how"><b>落地:</b>连胜日历 / 复习日报分享 / 错题清零庆祝;倦怠保护(7 天未复习降频)防止"欠债焦虑"。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">⑦ 变式题是「质量高地」</span><span class="tag tg-purple">借自 蜜蜂差评 + 作业帮</span></div>
+      <p class="bc-what">蜜蜂"举一反三不好用"被点名,作业帮同类推荐机械——市场缺高质量变式。</p>
+      <p class="bc-how"><b>落地:</b>坚持四维质检(答案唯一性/清晰度/相似度/考点覆盖)+ 失败自动重生成 + 用户反馈采集,把变式做成口碑点。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">⑧ 视频讲解补齐「懂」的短板</span><span class="tag tg-blue">借自 作业帮/小猿好评</span></div>
+      <p class="bc-what">视频讲题是大厂最被认可的能力之一,"听不懂可反复看"。</p>
+      <p class="bc-how"><b>落地:</b>M3 规划:高频错题自动生成"讲题短视频"(LLM 脚本 + TTS),作为付费会员权益(变现而非锁解析)。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">⑨ 付费墙避开「刚需」</span><span class="tag tg-red">借自 作业帮差评</span></div>
+      <p class="bc-what">把看解析/打印锁进会员引发大量投诉,学生群体价格敏感度高。</p>
+      <p class="bc-how"><b>落地:</b>核心闭环(录入/诊断/复习)永久免费;付费只收"增强"(视频精讲/批量组卷/多学科图谱),定价 ≤ ¥10/月。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">⑩ 干净体验 = 差异化</span><span class="tag tg-blue">借自 豆包好评</span></div>
+      <p class="bc-what">豆包被赞"无广告无推销最清爽",大厂广告与营销骚扰是差评重灾区。</p>
+      <p class="bc-how"><b>落地:</b>MVP 期零广告零推销;商业化入口仅「专项辅导」一处且可关闭,把"干净"写进品牌承诺。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">⑪ 批改要「讲原理」不要「判对错」</span><span class="tag tg-orange">借自 爱作业差评</span></div>
+      <p class="bc-what">爱作业只给对错被骂"答案式批改";且准确性差、手写识别弱。</p>
+      <p class="bc-how"><b>落地:</b>变式批改输出"过程分 + 错因 + 与原错题的思维差异对比",批改即教学。</p>
+    </div>
+    <div class="borrow-card">
+      <div class="bc-head"><span class="bc-title">⑫ 多端同步 + 分享闭环</span><span class="tag tg-blue">借自 优学好评</span></div>
+      <p class="bc-what">优学靠 iCloud 免费同步 + 微信分享获得好评;蜜蜂免费同步次数限制被吐槽。</p>
+      <p class="bc-how"><b>落地:</b>小程序天然微信分享;周报/错题清单支持分享给家长/老师(仅查看,预留生态入口)。</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>借鉴优先级建议</h3>
+    <div class="table-wrap" style="box-shadow:none;border:none;padding:0">
+    <table>
+      <thead><tr><th>优先级</th><th>借鉴项</th><th>落地阶段</th><th>价值</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag tg-red">P0</span></td><td>①录入极致轻 · ⑤自动制卡</td><td>M1 录入闭环</td><td>首日激活率(核心北极星)</td></tr>
+        <tr><td><span class="tag tg-red">P0</span></td><td>③启发式教学 · ④诚实自评</td><td>M2 复习引擎</td><td>复习价值感与留存</td></tr>
+        <tr><td><span class="tag tg-orange">P1</span></td><td>⑥激励节奏 · ⑦变式质量 · ⑨免费墙策略</td><td>M2-M3</td><td>口碑与复购基础</td></tr>
+        <tr><td><span class="tag tg-blue">P2</span></td><td>②错误次数筛选 · ⑧视频精讲 · ⑩干净体验 · ⑪批改讲原理 · ⑫分享闭环</td><td>M3 及后续</td><td>差异化护城河</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 6 定位 ===================== -->
+<section class="section" id="s6">
+  <div class="section-head"><span class="section-num">PART 06</span><h2 class="section-title">差异化定位</h2></div>
+  <p class="section-desc">Recall AI 的定位一句话:比蜜蜂试卷更懂"学",比作业帮更干净,比 Anki 更省心。</p>
+
+  <div class="pos-grid">
+    <div class="pos-card"><div class="pos-name">蜜蜂试卷</div><p class="pos-quote">"存得下、打得出"</p>
+      <div class="pos-score">★☆☆☆☆</div><div class="pos-axis">「学」的深度</div></div>
+    <div class="pos-card"><div class="pos-name">作业帮/小猿</div><p class="pos-quote">"答案全、生态大"</p>
+      <div class="pos-score">★★☆☆☆</div><div class="pos-axis">「学」的深度</div></div>
+    <div class="pos-card"><div class="pos-name">Anki</div><p class="pos-quote">"记得牢、门槛高"</p>
+      <div class="pos-score">★★★☆☆</div><div class="pos-axis">「学」的深度</div></div>
+    <div class="pos-card pos-us"><div class="pos-name">Recall AI</div><p class="pos-quote">"录入轻 · 诊断懂 · 复习准"</p>
+      <div class="pos-score">★★★★★</div><div class="pos-axis">「学」的深度</div></div>
+  </div>
+
+  <div class="card">
+    <h3>总结:Recall AI 的三个竞争支点</h3>
+    <ul>
+      <li><b>支点一(能力差)</b>:从"错题整理"升级为"学习教练"——AI 诊断 + 变式强化 + 间隔复习的完整闭环,竞品均只覆盖片段</li>
+      <li><b>支点二(体验差)</b>:零广告、零诱导、核心功能免费——直击作业帮/小猿的差评重灾区</li>
+      <li><b>支点三(成本差)</b>:拍照即自动制卡——消灭 Anki 的制卡门槛,用「0 生产成本」换取「坚持」</li>
+    </ul>
+    <div class="branch"><span class="bt">⚠ 风险提示</span>最大风险在 AI 质量(诊断采纳率、变式题质量)——这正是蜜蜂"举一反三"与作业帮"AI 解析"被骂的地方。落地必须配套回归测试集 + 人工兜底 + 用户反馈采集,不能重蹈覆辙。</div>
+  </div>
+</section>
+
+<footer>
+  <span>Recall AI 智能错题本 · 竞品分析报告 v1.0</span>
+  <span>信息源:App Store 评价 / 黑猫投诉 / 2026 媒体实测(华商报等)</span>
+  <span>配套:业务流程设计 v2.0 · MVP 技术文档 v1.0</span>
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Recall AI 系统测试报告</title>
+<style>
+:root{
+  --primary:#5645d4; --primary-pressed:#4534b3; --primary-deep:#3a2a99; --on-primary:#fff;
+  --ai-start:#6366f1; --ai-end:#8b5cf6; --ai-soft:rgba(99,102,241,.08);
+  --brand-navy:#0a1530; --brand-navy-deep:#070f24; --brand-navy-mid:#1a2a52;
+  --link-blue:#0075de; --link-blue-pressed:#005bab;
+  --ink:#1a1a1a; --charcoal:#37352f; --slate:#5d5b54; --steel:#787671; --stone:#a4a097; --muted:#bbb8b1;
+  --canvas:#fff; --surface:#f6f5f4; --surface-soft:#fafaf9;
+  --hairline:#e5e3df; --hairline-strong:#c8c4be;
+  --success:#1aae39; --success-tint:#d9f3e1; --warning:#dd5b00; --warning-tint:#ffe8d4;
+  --error:#e03131; --error-tint:#fde0ec; --info:#0075de; --info-tint:#dcecfa;
+  --font-sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Inter",-apple-system,sans-serif;
+  --font-mono:ui-monospace,Consolas,monospace;
+  --r-md:8px; --r-lg:12px; --r-xl:16px;
+  --shadow-sm:0 1px 3px rgba(10,21,48,.06); --shadow-md:0 4px 12px rgba(10,21,48,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-sans);background:var(--surface-soft);color:var(--charcoal);font-size:14px;line-height:1.65}
+.container{max-width:1080px;margin:0 auto;padding:0 28px}
+.hero{background:linear-gradient(135deg,var(--brand-navy-deep),var(--brand-navy) 55%,var(--primary-deep) 130%);color:#fff;padding:44px 0 36px}
+.hero h1{font-size:26px;font-weight:700;letter-spacing:-.5px;margin-bottom:8px}
+.hero p{font-size:13.5px;color:rgba(255,255,255,.72);max-width:720px}
+.score{display:flex;gap:24px;margin-top:20px;flex-wrap:wrap}
+.score .s{display:flex;align-items:baseline;gap:8px}
+.score .s b{font-size:30px;font-variant-numeric:tabular-nums}
+.score .s span{font-size:12px;color:rgba(255,255,255,.65)}
+.score .s.pass b{color:#5ddf83}
+.score .s.warn b{color:#ffc26b}
+.score .s.fail b{color:#ff8a8a}
+section{margin-top:40px}
+h2{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+h2 .n{width:30px;height:30px;border-radius:9px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+.card{background:#fff;border:1px solid var(--hairline);border-radius:16px;padding:22px;box-shadow:var(--shadow-sm);margin-bottom:16px}
+.card h3{font-size:15px;font-weight:700;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-weight:600;color:var(--slate);background:var(--surface);padding:8px 12px;border-bottom:1px solid var(--hairline)}
+td{padding:8px 12px;border-bottom:1px solid var(--hairline);vertical-align:top}
+tr:hover td{background:var(--surface-soft)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px}
+.t-pass{background:var(--success-tint);color:#0a6b1f}
+.t-fail{background:var(--error-tint);color:var(--error)}
+.t-warn{background:var(--warning-tint);color:var(--warning)}
+.t-info{background:var(--info-tint);color:var(--link-blue-pressed)}
+.sev{font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px}
+.sv-h{background:var(--error-tint);color:var(--error)}
+.sv-m{background:var(--warning-tint);color:var(--warning)}
+.sv-l{background:var(--success-tint);color:#0a6b1f}
+.issue{border-left:4px solid var(--warning);background:var(--surface-soft);border-radius:0 12px 12px 0;padding:14px 16px;margin-bottom:14px}
+.issue.serious{border-left-color:var(--error)}
+.issue h4{font-size:13.5px;font-weight:700;display:flex;gap:10px;align-items:center;margin-bottom:6px}
+.issue p{font-size:12.5px;color:var(--slate)}
+.issue .fix{margin-top:8px;font-size:12px;background:#fff;border:1px dashed var(--hairline-strong);border-radius:8px;padding:8px 12px}
+.issue .fix b{color:var(--primary-deep)}
+code{font-family:var(--font-mono);font-size:11.5px;background:var(--surface);border:1px solid var(--hairline);border-radius:5px;padding:1px 6px;color:var(--primary-deep)}
+footer{border-top:1px solid var(--hairline);margin-top:48px;padding:22px 0 36px;text-align:center;font-size:12px;color:var(--stone)}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="container">
+    <h1>Recall AI 系统测试报告</h1>
+    <p>测试对象:recall-app-static.html(离线演示版) · 测试引擎:Playwright + Chromium(headless)· 覆盖五维:功能符合性 / 页面交互 / 布局响应式 / 异常情况 / AI 功能</p>
+    <div class="score">
+      <div class="s pass"><b>27</b><span>通过</span></div>
+      <div class="s pass"><b>0</b><span>失败</span></div>
+      <div class="s warn"><b>1</b><span>优化建议</span></div>
+      <div class="s pass"><b>0</b><span>console 错误</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 1 测试结果 -->
+<section>
+  <h2><span class="n">1</span>测试结果</h2>
+  <div class="card">
+    <h3>测试用例明细(27 项)</h3>
+    <table>
+      <tr><th style="width:50px">编号</th><th style="width:230px">测试项</th><th style="width:80px">维度</th><th style="width:60px">结果</th><th>说明</th></tr>
+      <tr><td>T00</td><td>页面加载</td><td><span class="tag t-info">功能</span></td><td><span class="tag t-pass">PASS</span></td><td>file:// 直接打开无白屏</td></tr>
+      <tr><td>T01</td><td>错题列表渲染</td><td><span class="tag t-info">功能</span></td><td><span class="tag t-pass">PASS</span></td><td>5 条 mock 错题完整渲染(数学/物理/化学/英语)</td></tr>
+      <tr><td>T02</td><td>录入弹窗打开</td><td><span class="tag t-info">功能</span></td><td><span class="tag t-pass">PASS</span></td><td>默认文本通道</td></tr>
+      <tr><td>T03</td><td>四通道 Tab</td><td><span class="tag t-info">功能</span></td><td><span class="tag t-pass">PASS</span></td><td>文本 / 拍照 / 截图 / 对话齐全</td></tr>
+      <tr><td>T04</td><td>AI 识别结果卡片</td><td><span class="tag t-ai" style="background:linear-gradient(90deg,var(--ai-start),var(--ai-end));color:#fff">AI</span></td><td><span class="tag t-pass">PASS</span></td><td>识别学科/知识点/错因并展示</td></tr>
+      <tr><td>T05</td><td>录入成功</td><td><span class="tag t-info">功能</span></td><td><span class="tag t-pass">PASS</span></td><td>提交后 Toast「录入成功」</td></tr>
+      <tr><td>T06</td><td>空题干拦截</td><td><span class="tag t-warn">异常</span></td><td><span class="tag t-pass">PASS</span></td><td>「请填写题干」提示,不提交</td></tr>
+      <tr><td>T07</td><td>复习弹窗</td><td><span class="tag t-info">功能</span></td><td><span class="tag t-pass">PASS</span></td><td>今日清单正常打开</td></tr>
+      <tr><td>T08</td><td>SM-2 自评提交</td><td><span class="tag t-info">功能</span></td><td><span class="tag t-pass">PASS</span></td><td>三档自评 → 返回下次复习时间</td></tr>
+      <tr><td>T09</td><td>导出</td><td><span class="tag t-info">功能</span></td><td><span class="tag t-pass">PASS</span></td><td>离线生成模拟导出内容,无 CORS 报错</td></tr>
+      <tr><td>T10</td><td>导航切换 ×5</td><td><span class="tag t-info">交互</span></td><td><span class="tag t-pass">PASS</span></td><td>AI答疑/看板/帮助/设置/错题集全部可达</td></tr>
+      <tr><td>T11</td><td>看板下拉筛选</td><td><span class="tag t-info">交互</span></td><td><span class="tag t-pass">PASS</span></td><td>时间范围(7/30/90)+ 学科切换生效</td></tr>
+      <tr><td>T12</td><td>AI 对话</td><td><span class="tag t-ai" style="background:linear-gradient(90deg,var(--ai-start),var(--ai-end));color:#fff">AI</span></td><td><span class="tag t-pass">PASS</span></td><td>发送→回复(离线演示文案)</td></tr>
+      <tr><td>T13</td><td>快捷提问 chip</td><td><span class="tag t-info">交互</span></td><td><span class="tag t-pass">PASS</span></td><td>点击自动提问</td></tr>
+      <tr><td>T14</td><td>新建对话</td><td><span class="tag t-info">交互</span></td><td><span class="tag t-pass">PASS</span></td><td>重置为欢迎语,标题「新对话」</td></tr>
+      <tr><td>T15</td><td>响应式(3 断点)</td><td><span class="tag t-info">布局</span></td><td><span class="tag t-pass">PASS</span></td><td>1440/768/390 均无横向溢出</td></tr>
+      <tr><td>T16</td><td>设置页未配置态</td><td><span class="tag t-warn">异常</span></td><td><span class="tag t-pass">PASS</span></td><td>API Key 状态正确显示「未配置」</td></tr>
+      <tr><td>T17</td><td>空 Key 拦截</td><td><span class="tag t-warn">异常</span></td><td><span class="tag t-pass">PASS</span></td><td>「请先输入 API Key」</td></tr>
+      <tr><td>T18</td><td>搜索空结果态</td><td><span class="tag t-warn">异常</span></td><td><span class="tag t-pass">PASS</span></td><td>「没有匹配的错题」引导</td></tr>
+      <tr><td>T19</td><td>AI 回答结构</td><td><span class="tag t-ai" style="background:linear-gradient(90deg,var(--ai-start),var(--ai-end));color:#fff">AI</span></td><td><span class="tag t-pass">PASS</span></td><td>包含讲解结构与降级说明</td></tr>
+      <tr><td>T20</td><td>对话通道录入</td><td><span class="tag t-info">功能</span></td><td><span class="tag t-pass">PASS</span></td><td>对话描述→AI 整理入口可用</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 2 发现的问题 -->
+<section>
+  <h2><span class="n">2</span>发现的问题(测试中发现并已修复)</h2>
+
+  <div class="issue serious">
+    <h4><span class="sev sv-h">严重</span>移动端(≤390px)顶部导航横向溢出 31px</h4>
+    <p>品牌区 84px + 5 个导航图标(45px×5)+ 头像 32px + padding 48px = <code>421px &gt; 390px</code>,页面出现横向滚动条。违反开发规划「≤640px 底部 Tab」的响应式要求。</p>
+    <div class="fix"><b>修复:</b>TopNav.vue 移动端压缩按钮内边距(<code>px-3.5 → px-2</code>)、品牌文字隐藏(<code>hidden sm:inline</code>)、导航 <code>overflow-x-auto</code>。已重新构建并验证 390px 无溢出。<span class="tag t-pass" style="margin-left:8px">已验证</span></div>
+  </div>
+
+  <div class="issue serious">
+    <h4><span class="sev sv-h">严重</span>离线版导出触发 CORS 报错</h4>
+    <p>静态版点「导出」时向 <code>file:///C:/api/v1/questions/export/pdf</code> 发起真实请求,被浏览器 CORS 拦截,console 报 2 个错误,导出失败。</p>
+    <div class="fix"><b>修复:</b>client.ts 的 <code>exportPdf</code> 增加 OFFLINE 分支,离线时生成模拟导出内容。已重新构建并验证 console 错误清零。<span class="tag t-pass" style="margin-left:8px">已验证</span></div>
+  </div>
+
+  <div class="issue">
+    <h4><span class="sev sv-l">优化</span>移动端未实现底部 Tab 导航</h4>
+    <p>390px 下仅右下角 FAB(录入/复习),无开发规划要求的底部 Tab;导航靠顶部横向滚动可达全部页面,功能可用但移动体验未达最佳。</p>
+    <div class="fix"><b>建议:</b>后续迭代按开发规划「≤640px 底部 Tab + safe-area-inset-bottom」实现,当前优先级:P2。</div>
+  </div>
+</section>
+
+<!-- 3 严重程度汇总 -->
+<section>
+  <h2><span class="n">3</span>问题严重程度汇总</h2>
+  <div class="card">
+    <table>
+      <tr><th>级别</th><th>数量</th><th>说明</th><th>状态</th></tr>
+      <tr><td><span class="sev sv-h">严重</span></td><td>2</td><td>移动端导航溢出 / 离线导出 CORS</td><td><span class="tag t-pass">已修复并回归通过</span></td></tr>
+      <tr><td><span class="sev sv-m">一般</span></td><td>0</td><td>—</td><td>—</td></tr>
+      <tr><td><span class="sev sv-l">优化</span></td><td>1</td><td>移动端底部 Tab 未实现</td><td><span class="tag t-warn">建议 P2 迭代</span></td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 4 修改建议 -->
+<section>
+  <h2><span class="n">4</span>修改建议</h2>
+  <div class="card">
+    <table>
+      <tr><th style="width:60px">优先级</th><th style="width:200px">建议项</th><th>内容</th></tr>
+      <tr><td><span class="sev sv-l">P1</span></td><td>底部 Tab 落地</td><td>按开发规划在 <code>App.vue</code> 增加 <code>≤640px</code> 底部导航(错题集/AI答疑/看板/设置),带 safe-area 适配</td></tr>
+      <tr><td><span class="sev sv-l">P2</span></td><td>AI 讲解深化</td><td>离线版 AI 回答较简短;建议预置 2-3 个完整讲解模板(导数/圆锥曲线/时态)提升演示说服力</td></tr>
+      <tr><td><span class="sev sv-l">P2</span></td><td>键盘可访问性</td><td>弹窗焦点陷阱(focus trap)与 Esc 关闭统一化,补 aria-modal/role=dialog</td></tr>
+      <tr><td><span class="sev sv-l">P3</span></td><td>E2E 测试固化</td><td>将本报告 27 个用例固化为 <code>recall-e2e.py</code> 回归脚本,接入 CI(Playwright 已就绪)</td></tr>
+    </table>
+  </div>
+</section>
+
+<footer>Recall AI 系统测试报告 · 端测测(Web 应用测试专家)· 2026-08-13 · 测试对象 recall-app-static.html</footer>
+</div>
+</body>
+</html>

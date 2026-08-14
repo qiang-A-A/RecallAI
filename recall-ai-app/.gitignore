@@ -1,0 +1,28 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ===== Node / 前端 =====
+node_modules/
+dist/
+dist2/
+.vite/
+*.local
+
+# ===== 数据 / 环境 =====
+*.db
+*.sqlite3
+chroma_data/
+uploads/
+.env
+*.log
+
+# ===== 系统 =====
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

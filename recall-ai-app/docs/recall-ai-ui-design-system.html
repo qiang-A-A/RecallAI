@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recall AI · Web UI Design System (Notion × Glassmorphism)</title>
+<style>
+/* ============================================================
+   Recall AI UI Design System v2.0
+   A(Notion 知识管理底座) × C(毛玻璃 AI 科技点缀)
+   ============================================================ */
+:root{
+  /* --- Primary (Notion 紫罗兰底座) --- */
+  --primary:#5645d4; --primary-pressed:#4534b3; --primary-deep:#3a2a99;
+  --on-primary:#ffffff;
+  /* --- AI 玻璃拟态渐变 (C) --- */
+  --ai-start:#6366f1; --ai-end:#8b5cf6; --ai-soft:rgba(99,102,241,.08);
+  --glass-bg:rgba(255,255,255,.55); --glass-border:rgba(255,255,255,.6);
+  --glass-highlight:inset 0 1px 0 rgba(255,255,255,.7);
+  /* --- Brand & Dark --- */
+  --brand-navy:#0a1530; --brand-navy-deep:#070f24; --brand-navy-mid:#1a2a52;
+  --brand-purple:#7b3ff2; --brand-purple-300:#d6b6f6;
+  /* --- Interactive --- */
+  --link-blue:#0075de; --link-blue-pressed:#005bab;
+  /* --- Neutral (Notion 暖灰) --- */
+  --ink:#1a1a1a; --charcoal:#37352f; --slate:#5d5b54; --steel:#787671;
+  --stone:#a4a097; --muted:#bbb8b1;
+  /* --- Surface & Borders --- */
+  --canvas:#ffffff; --surface:#f6f5f4; --surface-soft:#fafaf9;
+  --hairline:#e5e3df; --hairline-strong:#c8c4be;
+  /* --- Semantic --- */
+  --success:#1aae39; --success-tint:#d9f3e1;
+  --warning:#dd5b00; --warning-tint:#ffe8d4;
+  --error:#e03131; --error-tint:#fde0ec;
+  --info:#0075de; --info-tint:#dcecfa;
+  /* --- Tints --- */
+  --tint-lavender:#e6e0f5; --tint-sky:#dcecfa; --tint-mint:#d9f3e1;
+  --tint-peach:#ffe8d4; --tint-yellow:#fef7d6; --tint-cream:#f8f5e8;
+  /* --- Typography --- */
+  --font-sans:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC","Inter",-apple-system,sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Consolas,"JetBrains Mono",monospace;
+  /* --- Radius --- */
+  --r-xs:4px; --r-sm:6px; --r-md:8px; --r-lg:12px; --r-xl:16px; --r-2xl:20px;
+  /* --- Shadows (Linear 克制阴影) --- */
+  --shadow-xs:0 1px 2px rgba(10,21,48,.05);
+  --shadow-sm:0 1px 3px rgba(10,21,48,.06),0 1px 2px rgba(10,21,48,.04);
+  --shadow-md:0 4px 12px rgba(10,21,48,.08),0 2px 4px rgba(10,21,48,.04);
+  --shadow-lg:0 12px 32px rgba(10,21,48,.10),0 4px 8px rgba(10,21,48,.05);
+  --shadow-xl:0 24px 60px rgba(10,21,48,.14),0 8px 16px rgba(10,21,48,.06);
+  /* --- Spacing (4px 基数) --- */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-8:32px; --space-10:40px;
+  --space-12:48px; --space-16:64px;
+  /* --- Layout --- */
+  --container-max:1180px; --nav-h:60px;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--surface-soft);color:var(--charcoal);
+  font-size:14px;line-height:1.6;-webkit-font-smoothing:antialiased}
+::selection{background:var(--tint-lavender)}
+.container{max-width:1180px;margin:0 auto;padding:0 32px}
+section{padding:56px 0;border-bottom:1px solid var(--hairline)}
+section:last-child{border-bottom:none}
+
+/* Hero */
+.hero{background:linear-gradient(140deg,#0a1530 0%,#1a2a52 55%,#2d2a66 100%);
+  color:#fff;padding:72px 0;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-80px;top:-80px;width:360px;height:360px;
+  background:radial-gradient(circle,rgba(99,102,241,.45),transparent 70%)}
+.hero .eyebrow{font-size:12px;letter-spacing:.16em;color:var(--brand-purple-300);
+  text-transform:uppercase;margin-bottom:12px;font-weight:600}
+.hero h1{font-size:36px;font-weight:700;margin:0 0 14px;letter-spacing:-.02em}
+.hero h1 em{font-style:normal;color:#f5d75e}
+.hero .sub{font-size:15px;color:rgba(255,255,255,.78);max-width:640px;margin:0 0 28px}
+.hero .chips{display:flex;gap:10px;flex-wrap:wrap}
+.hero .chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  padding:6px 14px;border-radius:999px;font-size:12px}
+
+/* Section head */
+.sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+.sec-num{font-size:12px;font-weight:700;color:var(--primary);background:var(--tint-lavender);
+  padding:4px 12px;border-radius:999px;white-space:nowrap}
+.sec-title{font-size:24px;font-weight:700;letter-spacing:-.01em;margin:0}
+.sec-desc{color:var(--slate);font-size:13.5px;margin:0 0 28px}
+.sec-note{color:var(--stone);font-size:12px;margin:0 0 20px}
+
+/* Token tables */
+.tbl{width:100%;border-collapse:collapse;font-size:13px;background:#fff;
+  border:1px solid var(--hairline);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.tbl th,.tbl td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--hairline);vertical-align:middle}
+.tbl th{background:var(--surface);font-size:11px;font-weight:600;color:var(--stone);
+  text-transform:uppercase;letter-spacing:.06em}
+.tbl tr:last-child td{border-bottom:none}
+.tbl code{font-family:var(--font-mono);font-size:12px;background:var(--tint-lavender);
+  color:var(--primary-deep);padding:2px 8px;border-radius:5px;white-space:nowrap}
+.swatch{display:inline-block;width:44px;height:44px;border-radius:8px;
+  border:1px solid rgba(0,0,0,.08);vertical-align:middle;margin-right:12px}
+
+/* Spec rows */
+.spec-row{display:flex;align-items:flex-start;gap:20px;margin-bottom:16px;background:#fff;
+  border:1px solid var(--hairline);border-radius:12px;padding:16px 18px}
+.spec-row .s-label{flex:none;width:90px;font-size:12px;font-weight:600;color:var(--slate);padding-top:4px}
+.spec-row .s-body{flex:1;min-width:0}
+.spec-row .s-body code{font-family:var(--font-mono);font-size:12px;color:var(--primary-deep);background:var(--tint-lavender);padding:1px 6px;border-radius:4px}
+
+/* Type scale */
+.type-row{display:flex;align-items:baseline;gap:24px;padding:12px 0;border-bottom:1px dashed var(--hairline)}
+.type-row:last-child{border-bottom:none}
+.type-row .t-spec{flex:none;width:180px;font-size:11px;color:var(--stone);font-family:var(--font-mono)}
+.type-row .t-sample{flex:1;min-width:0;color:var(--charcoal);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Spacing scale */
+.spacer-row{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+.spacer-row .s-name{flex:none;width:70px;font-size:12px;color:var(--slate);font-family:var(--font-mono)}
+.spacer-row .s-bar{background:var(--primary);border-radius:4px;flex:none}
+.spacer-row .s-val{font-size:12px;color:var(--stone)}
+
+/* Radius scale */
+.radius-row{display:flex;align-items:center;gap:20px;margin-bottom:14px}
+.radius-row .r-name{flex:none;width:70px;font-size:12px;color:var(--slate);font-family:var(--font-mono)}
+.radius-row .r-box{width:56px;height:56px;background:#fff;border:1.5px solid var(--primary);flex:none}
+.radius-row .r-val{font-size:12px;color:var(--stone)}
+
+/* Glass demo */
+.glass-stage{position:relative;border-radius:16px;padding:32px;overflow:hidden;
+  background:linear-gradient(135deg,#eef2ff 0%,#f5f3ff 50%,#ede9fe 100%)}
+.glass-stage::before{content:"";position:absolute;width:140px;height:140px;border-radius:50%;
+  background:rgba(99,102,241,.25);top:-30px;left:10%;filter:blur(2px)}
+.glass-stage::after{content:"";position:absolute;width:100px;height:100px;border-radius:50%;
+  background:rgba(139,92,246,.2);bottom:-20px;right:15%}
+.glass-card{position:relative;z-index:1;background:var(--glass-bg);
+  border:1px solid var(--glass-border);backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);border-radius:16px;padding:18px 20px;
+  box-shadow:var(--shadow-md),var(--glass-highlight);max-width:340px}
+.glass-card .g-t{font-size:13px;font-weight:600;color:var(--primary-deep);margin-bottom:4px}
+.glass-card .g-d{font-size:12.5px;color:var(--slate)}
+
+/* Components */
+.demo{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:8px}
+.btn{display:inline-flex;align-items:center;gap:8px;border-radius:8px;padding:10px 18px;
+  font-size:13.5px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:var(--shadow-sm)}
+.btn-primary:hover{background:var(--primary-pressed)}
+.btn-secondary{background:#fff;color:var(--charcoal);border:1px solid var(--hairline-strong)}
+.btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+.btn-ghost{color:var(--slate)}
+.btn-ghost:hover{background:var(--surface);color:var(--charcoal)}
+.btn-danger{background:var(--error);color:#fff}
+.btn-danger:hover{background:#b3272b}
+.btn-glass{background:var(--glass-bg);border:1px solid var(--glass-border);
+  backdrop-filter:blur(10px);color:var(--primary-deep);box-shadow:var(--glass-highlight)}
+.btn-sm{padding:7px 12px;font-size:12.5px}
+.btn-lg{padding:13px 24px;font-size:15px}
+.btn:disabled{opacity:.5;cursor:not-allowed;pointer-events:none}
+
+.card{background:#fff;border:1px solid var(--hairline);border-radius:14px;padding:20px 22px;
+  box-shadow:var(--shadow-sm);transition:box-shadow .15s,transform .15s}
+.card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.card-interactive{cursor:pointer}
+.card-flat{background:#fff;border:1px solid var(--hairline);border-radius:12px;padding:16px 18px}
+
+.input{background:#fff;border:1px solid var(--hairline-strong);border-radius:8px;
+  padding:10px 14px;font-size:14px;transition:all .15s;width:260px;font-family:inherit}
+.input::placeholder{color:var(--stone)}
+.input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(86,69,212,.12)}
+.input-error{border-color:var(--error)}
+.input-error:focus{box-shadow:0 0 0 3px rgba(224,49,49,.12)}
+.input-disabled{background:var(--surface);color:var(--stone);cursor:not-allowed}
+.input-success{border-color:var(--success)}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-size:12px;font-weight:600;color:var(--slate)}
+.field .err-msg{font-size:11.5px;color:var(--error)}
+.field .ok-msg{font-size:11.5px;color:var(--success)}
+
+/* Layout */
+.layout-scheme{background:#fff;border:1px solid var(--hairline);border-radius:12px;padding:18px}
+.layout-top{height:44px;border:1.5px dashed var(--hairline-strong);border-radius:8px;margin-bottom:12px;
+  display:flex;align-items:center;padding:0 12px;font-size:12px;color:var(--stone)}
+.layout-body{display:grid;grid-template-columns:200px 1fr;gap:12px}
+.layout-side{min-height:200px;border:1.5px dashed var(--hairline-strong);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--stone)}
+.layout-main{min-height:200px;border:1.5px dashed var(--hairline-strong);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--stone)}
+
+/* Responsive table + breakpoints */
+.bp-bar{display:flex;align-items:flex-end;gap:4px;height:90px;margin:20px 0;padding:0 4px}
+.bp-seg{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px}
+.bp-seg .bar{width:100%;border-radius:6px 6px 0 0;background:var(--tint-lavender);border:1px solid var(--primary)}
+.bp-seg .bar.solid{background:var(--primary)}
+.bp-seg span{font-size:10.5px;color:var(--steel);white-space:nowrap}
+
+.footer{padding:40px 0;color:var(--stone);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:860px){.grid-2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <div class="container">
+    <div class="eyebrow">UI Design System · v2.0</div>
+    <h1>Recall AI <em>Design System</em></h1>
+    <p class="sub">Notion 知识管理底座 × 毛玻璃 AI 科技点缀 —— 用熟悉的卡片/标签体系保证学习效率,用玻璃拟态传达 AI 智能感。适用于 Vue3 组件化开发。</p>
+    <div class="chips">
+      <span class="chip">A · Notion 知识管理</span>
+      <span class="chip">C · Glassmorphism AI</span>
+      <span class="chip">Vue3 组件化</span>
+      <span class="chip">WCAG AA</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ================= 1 色彩规范 ================= -->
+<section id="color">
+  <div class="sec-head"><span class="sec-num">01</span><h2 class="sec-title">色彩规范</h2></div>
+  <p class="sec-desc">以 Notion 紫罗兰为品牌底座,靛蓝紫渐变专用于 AI 能力;语义色全程一致,浅底 tint 用于标签/徽章/选中态。</p>
+
+  <table class="tbl">
+    <thead><tr><th>Token</th><th>色值</th><th>用途</th><th>示例</th></tr></thead>
+    <tbody>
+      <tr><td><code>--primary</code></td><td><span class="swatch" style="background:#5645d4"></span>#5645d4</td><td>品牌主色 / 主要 CTA / 选中态</td><td><span class="badge-demo" style="background:var(--tint-lavender);color:var(--primary-deep);padding:2px 10px;border-radius:999px;font-size:11px">主操作</span></td></tr>
+      <tr><td><code>--primary-pressed</code></td><td><span class="swatch" style="background:#4534b3"></span>#4534b3</td><td>主按钮按下态</td><td>-</td></tr>
+      <tr><td><code>--ai-start / --ai-end</code></td><td><span class="swatch" style="background:#6366f1"></span><span class="swatch" style="background:#8b5cf6"></span>#6366f1 → #8b5cf6</td><td>AI 渐变:诊断 / 对话 / 玻璃拟态</td><td><span style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;padding:2px 10px;border-radius:999px;font-size:11px">AI 能力</span></td></tr>
+      <tr><td><code>--brand-navy</code></td><td><span class="swatch" style="background:#0a1530"></span>#0a1530</td><td>深色面:Hero / 深色模式 / 空状态</td><td>-</td></tr>
+      <tr><td><code>--charcoal</code></td><td><span class="swatch" style="background:#37352f"></span>#37352f</td><td>标题文字(暖黑)</td><td>-</td></tr>
+      <tr><td><code>--slate</code></td><td><span class="swatch" style="background:#5d5b54"></span>#5d5b54</td><td>次级文字</td><td>-</td></tr>
+      <tr><td><code>--success</code></td><td><span class="swatch" style="background:#1aae39"></span>#1aae39</td><td>已掌握 / 成功</td><td><span style="background:var(--success-tint);color:#0a7a23;padding:2px 10px;border-radius:999px;font-size:11px">已掌握</span></td></tr>
+      <tr><td><code>--warning</code></td><td><span class="swatch" style="background:#dd5b00"></span>#dd5b00</td><td>模糊 / 待复习</td><td><span style="background:var(--warning-tint);color:#9c3f00;padding:2px 10px;border-radius:999px;font-size:11px">模糊</span></td></tr>
+      <tr><td><code>--error</code></td><td><span class="swatch" style="background:#e03131"></span>#e03131</td><td>不会 / 删除 / 错误</td><td><span style="background:var(--error-tint);color:#a0233c;padding:2px 10px;border-radius:999px;font-size:11px">不会</span></td></tr>
+      <tr><td><code>--info</code></td><td><span class="swatch" style="background:#0075de"></span>#0075de</td><td>用户操作 / 链接 / 录入</td><td><span style="background:var(--info-tint);color:#005bab;padding:2px 10px;border-radius:999px;font-size:11px">录入</span></td></tr>
+    </tbody>
+  </table>
+
+  <p class="sec-note">中性灰阶(--surface-soft → --muted)与柔和 tint(--tint-lavender 等)沿用 Notion 体系,深色模式将 --surface-soft/--charcoal 等映射到品牌 navy 系即可。</p>
+</section>
+
+<!-- ================= 2 字体规范 ================= -->
+<section id="type">
+  <div class="sec-head"><span class="sec-num">02</span><h2 class="sec-title">字体规范</h2></div>
+  <p class="sec-desc">中文场景用系统字体栈;数字与公式使用 tabular-nums 等宽对齐,避免跳动;正文行高 1.6 适合长时间阅读。</p>
+
+  <table class="tbl">
+    <thead><tr><th>Token</th><th>字体栈</th><th>用途</th></tr></thead>
+    <tbody>
+      <tr><td><code>--font-sans</code></td><td>"PingFang SC" / "Microsoft YaHei" / "Inter" / -apple-system</td><td>全站 UI 与正文</td></tr>
+      <tr><td><code>--font-mono</code></td><td>ui-monospace / Consolas / JetBrains Mono</td><td>公式 / 代码 / 数字 / API Key</td></tr>
+    </tbody>
+  </table>
+
+  <div style="background:#fff;border:1px solid var(--hairline);border-radius:12px;padding:12px 22px;margin-bottom:20px">
+    <div class="type-row"><span class="t-spec">Display 32/700/-0.02em</span><span class="t-sample" style="font-size:32px;font-weight:700;letter-spacing:-.02em">今日复习 5 道错题</span></div>
+    <div class="type-row"><span class="t-spec">H1 26/650/-0.01em</span><span class="t-sample" style="font-size:26px;font-weight:650">错题集</span></div>
+    <div class="type-row"><span class="t-spec">H2 20/650</span><span class="t-sample" style="font-size:20px;font-weight:650">知识点掌握度</span></div>
+    <div class="type-row"><span class="t-spec">H3 16/600</span><span class="t-sample" style="font-size:16px;font-weight:600">导数与单调性</span></div>
+    <div class="type-row"><span class="t-spec">Body 14/400/1.65</span><span class="t-sample">已知函数 f(x)=x³−3x²+1,求其单调递减区间。这是正文默认样式。</span></div>
+    <div class="type-row"><span class="t-spec">Body-Medium 14/500</span><span class="t-sample" style="font-weight:500">列表项 / 表格数据</span></div>
+    <div class="type-row"><span class="t-spec">Caption 12/400</span><span class="t-sample" style="font-size:12px">辅助说明文字</span></div>
+    <div class="type-row"><span class="t-spec">Micro 11/600/.06em</span><span class="t-sample" style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">标签 / 徽章 / 表头</span></div>
+  </div>
+</section>
+
+<!-- ================= 3 间距规范 ================= -->
+<section id="spacing">
+  <div class="sec-head"><span class="sec-num">03</span><h2 class="sec-title">间距规范</h2></div>
+  <p class="sec-desc">4px 基数系统:组件内用 4-16px,区块间用 24-48px,页面留白 32px。复习页大留白(64px+),看板页中密度。</p>
+  <div class="spacer-row"><span class="s-name">space-1</span><div class="s-bar" style="width:4px;height:16px"></div><span class="s-val">4px · 图标间距</span></div>
+  <div class="spacer-row"><span class="s-name">space-2</span><div class="s-bar" style="width:8px;height:16px"></div><span class="s-val">8px · 组件内元素间距</span></div>
+  <div class="spacer-row"><span class="s-name">space-3</span><div class="s-bar" style="width:12px;height:16px"></div><span class="s-val">12px · 列表行距</span></div>
+  <div class="spacer-row"><span class="s-name">space-4</span><div class="s-bar" style="width:16px;height:16px"></div><span class="s-val">16px · 栅格列间距</span></div>
+  <div class="spacer-row"><span class="s-name">space-5</span><div class="s-bar" style="width:20px;height:16px"></div><span class="s-val">20px · 卡片内边距</span></div>
+  <div class="spacer-row"><span class="s-name">space-6</span><div class="s-bar" style="width:24px;height:16px"></div><span class="s-val">24px · 卡片内边距(大)</span></div>
+  <div class="spacer-row"><span class="s-name">space-8</span><div class="s-bar" style="width:32px;height:16px"></div><span class="s-val">32px · 页面左右留白</span></div>
+  <div class="spacer-row"><span class="s-name">space-12</span><div class="s-bar" style="width:48px;height:16px"></div><span class="s-val">48px · 区块间距</span></div>
+</section>
+
+<!-- ================= 4 圆角规范 ================= -->
+<section id="radius">
+  <div class="sec-head"><span class="sec-num">04</span><h2 class="sec-title">圆角规范</h2></div>
+  <p class="sec-desc">圆角语义化:越大的元素圆角越大。按钮 8px · 卡片 14px · 弹窗 16px · 玻璃卡片 16px。全站不混用非标圆角。</p>
+  <div class="radius-row"><span class="r-name">--r-xs</span><div class="r-box" style="border-radius:4px"></div><span class="r-val">4px · 内嵌元素 / 标签内角</span></div>
+  <div class="radius-row"><span class="r-name">--r-md</span><div class="r-box" style="border-radius:8px"></div><span class="r-val">8px · 按钮 / 输入框 / 下拉</span></div>
+  <div class="radius-row"><span class="r-name">--r-lg</span><div class="r-box" style="border-radius:12px"></div><span class="r-val">12px · 列表卡片 / 面板</span></div>
+  <div class="radius-row"><span class="r-name">--r-xl</span><div class="r-box" style="border-radius:16px"></div><span class="r-val">16px · 弹窗 / 玻璃卡片 / Hero</span></div>
+  <div class="radius-row"><span class="r-name">--r-2xl</span><div class="r-box" style="border-radius:20px"></div><span class="r-val">20px · 大图卡片 / 登录卡</span></div>
+</section>
+
+<!-- ================= 5 组件规范 ================= -->
+<section id="components">
+  <div class="sec-head"><span class="sec-num">05</span><h2 class="sec-title">组件规范</h2></div>
+  <p class="sec-desc">以下为可交付 Vue3 组件的核心规格:状态完整(默认/悬停/按下/禁用),全部满足 WCAG AA 对比度。</p>
+
+  <h3 style="font-size:16px;font-weight:700;margin:28px 0 12px">按钮 Buttons</h3>
+  <div class="demo">
+    <button class="btn btn-primary">主要按钮</button>
+    <button class="btn btn-secondary">次要按钮</button>
+    <button class="btn btn-ghost">幽灵按钮</button>
+    <button class="btn btn-danger">危险按钮</button>
+    <button class="btn btn-glass">玻璃按钮(AI)</button>
+    <button class="btn btn-primary" disabled>禁用态</button>
+  </div>
+  <table class="tbl">
+    <thead><tr><th>变体</th><th>背景</th><th>文字</th><th>边框</th><th>Hover</th><th>Active</th></tr></thead>
+    <tbody>
+      <tr><td>Primary</td><td>#5645d4</td><td>#fff</td><td>无</td><td>#4534b3</td><td>scale(.97)</td></tr>
+      <tr><td>Secondary</td><td>#fff</td><td>#37352f</td><td>1px #c8c4be</td><td>边框→主色</td><td>scale(.97)</td></tr>
+      <tr><td>Ghost</td><td>透明</td><td>#5d5b54</td><td>无</td><td>#f6f5f4</td><td>scale(.97)</td></tr>
+      <tr><td>Danger</td><td>#e03131</td><td>#fff</td><td>无</td><td>#b3272b</td><td>scale(.97)</td></tr>
+      <tr><td>Glass(AI)</td><td>rgba(255,255,255,.55)+blur(10px)</td><td>#3a2a99</td><td>rgba(255,255,255,.6)</td><td>blur 加深</td><td>scale(.97)</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size:16px;font-weight:700;margin:28px 0 12px">卡片 Cards</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <b style="font-size:14px">标准卡片</b><span style="background:var(--tint-lavender);color:var(--primary-deep);font-size:11px;padding:2px 10px;border-radius:999px">默认</span>
+      </div>
+      <p style="font-size:12.5px;color:var(--slate);margin:0">背景 #fff · 边框 #e5e3df · 圆角 14px · 阴影 shadow-sm,Hover 升 shadow-md + 上移 1px。</p>
+    </div>
+    <div class="card card-interactive">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <b style="font-size:14px">交互卡片(错题卡)</b><span style="background:var(--info-tint);color:#005bab;font-size:11px;padding:2px 10px;border-radius:999px">可点击</span>
+      </div>
+      <p style="font-size:12.5px;color:var(--slate);margin:0">cursor:pointer,悬停边框加深为 #c8c4be,用于错题列表 / 推荐卡。</p>
+    </div>
+  </div>
+  <div class="glass-stage" style="margin-top:16px">
+    <div class="glass-card">
+      <div class="g-t">玻璃卡片 · AI 诊断区</div>
+      <div class="g-d">background rgba(255,255,255,.55) + blur(16px) + inset 高光,仅用于 AI 能力与 Hero 场景,不铺满全站。</div>
+    </div>
+  </div>
+
+  <h3 style="font-size:16px;font-weight:700;margin:28px 0 12px">输入框 Inputs</h3>
+  <div class="field">
+    <label for="i1">默认输入框</label>
+    <input class="input" id="i1" placeholder="输入题目或知识点…">
+  </div>
+  <div class="field">
+    <label for="i2">聚焦状态</label>
+    <input class="input" id="i2" value="导数与单调性" style="border-color:var(--primary);box-shadow:0 0 0 3px rgba(86,69,212,.12)">
+    <span class="ok-msg">聚焦:主色边框 + 3px 光圈</span>
+  </div>
+  <div class="field">
+    <label for="i3">错误状态</label>
+    <input class="input input-error" id="i3" value="fx(x)=x3">
+    <span class="err-msg">公式格式有误,请检查</span>
+  </div>
+  <div class="field">
+    <label for="i4">成功状态</label>
+    <input class="input input-success" id="i4" value="识别成功">
+    <span class="ok-msg">已识别,学科:数学</span>
+  </div>
+  <table class="tbl" style="margin-top:16px">
+    <thead><tr><th>状态</th><th>边框</th><th>背景</th><th>焦点效果</th></tr></thead>
+    <tbody>
+      <tr><td>默认</td><td>#c8c4be</td><td>#fff</td><td>主色边框 + 3px rgba(86,69,212,.12)</td></tr>
+      <tr><td>错误</td><td>#e03131</td><td>#fff</td><td>3px rgba(224,49,49,.12)</td></tr>
+      <tr><td>成功</td><td>#1aae39</td><td>#fff</td><td>—</td></tr>
+      <tr><td>禁用</td><td>#e5e3df</td><td>#f6f5f4</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ================= 6 页面布局规范 ================= -->
+<section id="layout">
+  <div class="sec-head"><span class="sec-num">06</span><h2 class="sec-title">页面布局规范</h2></div>
+  <p class="sec-desc">顶部导航(60px)+ 双栏内容区(左 200px 导航/列表 + 右自适应)。内容容器 max-width 1180px,12 列栅格,列间距 16px。</p>
+  <div class="layout-scheme">
+    <div class="layout-top">顶部导航 60px · sticky · 毛玻璃(导航允许)</div>
+    <div class="layout-body">
+      <div class="layout-side">左栏 200px<br>分类 / 对话列表</div>
+      <div class="layout-main">主内容区 · max-width 1180px · 12 列栅格</div>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-top:20px">
+    <div class="card card-flat"><b style="font-size:13.5px">复习页(专注)</b><p style="font-size:12.5px;color:var(--slate);margin:6px 0 0">单题居中,四周留白 64px+,无侧栏干扰,最大化专注。</p></div>
+    <div class="card card-flat"><b style="font-size:13.5px">看板页(信息)</b><p style="font-size:12.5px;color:var(--slate);margin:6px 0 0">KPI 4 列 + 图表双栏,数据密度高,最多 4 列不堆叠。</p></div>
+  </div>
+</section>
+
+<!-- ================= 7 响应式规范 ================= -->
+<section id="responsive">
+  <div class="sec-head"><span class="sec-num">07</span><h2 class="sec-title">响应式规范</h2></div>
+  <p class="sec-desc">Mobile First。触摸目标 ≥44px,桌面 ≥32px。侧栏 tablet 以下收为抽屉,看板图表折叠为单列手风琴。</p>
+
+  <div class="bp-bar">
+    <div class="bp-seg"><div class="bar" style="height:40px"></div><span>mobile</span></div>
+    <div class="bp-seg"><div class="bar" style="height:50px"></div><span>640</span></div>
+    <div class="bp-seg"><div class="bar" style="height:62px"></div><span>768</span></div>
+    <div class="bp-seg"><div class="bar solid" style="height:74px"></div><span>1024</span></div>
+    <div class="bp-seg"><div class="bar solid" style="height:84px"></div><span>1280</span></div>
+  </div>
+
+  <table class="tbl">
+    <thead><tr><th>断点</th><th>宽度</th><th>导航</th><th>布局</th><th>组件</th></tr></thead>
+    <tbody>
+      <tr><td><code>mobile</code></td><td>&lt; 640px</td><td>底部 Tab(错题集/AI/看板/我的)</td><td>单列堆叠</td><td>FAB 48px · 触摸目标 44px</td></tr>
+      <tr><td><code>tablet</code></td><td>640 - 1023px</td><td>顶部导航折叠,侧栏收抽屉</td><td>双栏 → 上下</td><td>卡片 2 列 · 图表单列</td></tr>
+      <tr><td><code>desktop</code></td><td>1024 - 1279px</td><td>完整顶部 + 左栏 200px</td><td>双栏 · 12 列栅格</td><td>看板 4 列 KPI</td></tr>
+      <tr><td><code>wide</code></td><td>≥ 1280px</td><td>完整导航</td><td>容器居中 1180px</td><td>玻璃拟态启用</td></tr>
+    </tbody>
+  </table>
+
+  <p class="sec-note">字体:桌面 14-16px 正文;移动端正文下限 14px 不缩放。标题用 clamp(22px, 4vw, 26px)。深色模式通过 <code>[data-theme="dark"]</code> 切换 navy 系 token。</p>
+</section>
+
+<footer class="footer">
+  <span>Recall AI · UI Design System v2.0 · A(Notion)× C(Glassmorphism)</span>
+  <span>设计者:UI Designer · 适用于 Vue3 + FastAPI 技术栈</span>
+  <span>配套:DESIGN.md v1.0 · Web 信息架构 v1.0</span>
+</footer>
+
+</div>
+</body>
+</html>
