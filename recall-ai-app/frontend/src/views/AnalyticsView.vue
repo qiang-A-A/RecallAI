@@ -85,6 +85,19 @@ const donut = computed(() => {
 })
 const centerPct = computed(() => donut.value[0].value)
 
+// ---------- 错因分布 TOP5(实时基于 store.items 统计当前错因) ----------
+const errorReasons = computed(() => {
+  const counter = new Map<string, number>()
+  for (const q of store.items) {
+    const r = (q.wrong_reason || '').trim() || '未标记'
+    counter.set(r, (counter.get(r) ?? 0) + 1)
+  }
+  return Array.from(counter.entries())
+    .map(([reason, count]) => ({ reason, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5)
+})
+
 // ---------- 最近十天(从 trend 取最近 10 天) ----------
 const days = computed(() => {
   const tr = report.value?.trend ?? []
@@ -301,8 +314,8 @@ watch([range, subjectFilter], () => { void loadData() })
         <div class="text-sm font-semibold text-charcoal pb-2.5 mb-3.5 border-b border-[#e5e3df]">
           错因分布 TOP5
         </div>
-        <div v-if="report?.error_reasons.length" class="space-y-2.5">
-          <div v-for="r in report.error_reasons" :key="r.reason"
+        <div v-if="errorReasons.length" class="space-y-2.5">
+          <div v-for="r in errorReasons" :key="r.reason"
                class="flex items-center gap-2.5">
             <span class="w-[70px] text-xs text-slate text-right flex-none">{{ r.reason }}</span>
             <div class="flex-1 h-[22px] bg-[#f6f5f4] rounded-md overflow-hidden">
@@ -312,7 +325,7 @@ watch([range, subjectFilter], () => { void loadData() })
             </div>
           </div>
         </div>
-        <div v-else class="text-center py-8 text-stone text-xs">暂无复习数据</div>
+        <div v-else class="text-center py-8 text-stone text-xs">暂无错题数据</div>
       </div>
 
       <!-- AI 优化推荐 -->
