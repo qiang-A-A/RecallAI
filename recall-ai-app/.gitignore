@@ -26,3 +26,5 @@ uploads/
 Thumbs.db
 .idea/
 .vscode/
+# ===== 本地工作区(不推送) =====
+.workbuddy/
